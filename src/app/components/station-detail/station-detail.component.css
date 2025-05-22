@@ -1,0 +1,269 @@
+.station-detail {
+  padding: 20px;
+  height: 100%;
+  overflow-y: auto;
+  background-color: white;
+}
+
+.station-header {
+  margin-bottom: 30px;
+  padding-bottom: 20px;
+  border-bottom: 1px solid #dee2e6;
+}
+
+.station-title {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 16px;
+}
+
+.station-title h1 {
+  margin: 0;
+  font-size: 28px;
+  font-weight: 600;
+  color: #333;
+}
+
+.status-badge {
+  padding: 6px 12px;
+  border-radius: 16px;
+  font-size: 12px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.status-active {
+  background-color: #d4edda;
+  color: #155724;
+}
+
+.status-maintenance {
+  background-color: #fff3cd;
+  color: #856404;
+}
+
+.status-inactive {
+  background-color: #f8d7da;
+  color: #721c24;
+}
+
+.station-meta {
+  display: flex;
+  gap: 24px;
+  flex-wrap: wrap;
+}
+
+.meta-item {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.meta-label {
+  font-size: 12px;
+  font-weight: 600;
+  color: #6c757d;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.meta-value {
+  font-size: 14px;
+  color: #333;
+  font-weight: 500;
+}
+
+.station-content {
+  display: grid;
+  grid-template-columns: 1fr 300px;
+  gap: 30px;
+}
+
+.diagram-section h2 {
+  margin: 0 0 20px 0;
+  font-size: 20px;
+  font-weight: 600;
+  color: #333;
+}
+
+.technical-diagram {
+  background-color: #f8f9fa;
+  border: 1px solid #dee2e6;
+  border-radius: 8px;
+  padding: 20px;
+  overflow-x: auto;
+}
+
+.station-diagram {
+  width: 100%;
+  height: auto;
+  min-width: 600px;
+  background-color: white;
+  border-radius: 4px;
+}
+
+.info-panels {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.info-panel {
+  background-color: #f8f9fa;
+  border: 1px solid #dee2e6;
+  border-radius: 8px;
+  padding: 20px;
+}
+
+.info-panel h3 {
+  margin: 0 0 16px 0;
+  font-size: 16px;
+  font-weight: 600;
+  color: #333;
+}
+
+.platform-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.platform-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 8px;
+  background-color: white;
+  border-radius: 4px;
+}
+
+.platform-number {
+  width: 24px;
+  height: 24px;
+  background-color: #C41E3A;
+  color: white;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.platform-details {
+  flex: 1;
+}
+
+.platform-name {
+  font-weight: 500;
+  color: #333;
+  margin-bottom: 2px;
+}
+
+.platform-status {
+  font-size: 12px;
+  color: #28a745;
+  font-weight: 500;
+}
+
+.tech-specs {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.spec-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px 0;
+  border-bottom: 1px solid #e9ecef;
+}
+
+.spec-item:last-child {
+  border-bottom: none;
+}
+
+.spec-label {
+  font-size: 13px;
+  color: #6c757d;
+  font-weight: 500;
+}
+
+.spec-value {
+  font-size: 13px;
+  color: #333;
+  font-weight: 600;
+}
+
+.operational-info {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.status-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  color: #333;
+}
+
+.status-indicator {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+}
+
+.status-indicator.active {
+  background-color: #28a745;
+}
+
+.status-indicator.warning {
+  background-color: #ffc107;
+}
+
+.status-indicator.error {
+  background-color: #dc3545;
+}
+
+@media (max-width: 1024px) {
+  .station-content {
+    grid-template-columns: 1fr;
+  }
+
+  .info-panels {
+    grid-row: 1;
+  }
+
+  .diagram-section {
+    grid-row: 2;
+  }
+}
+
+@media (max-width: 768px) {
+  .station-detail {
+    padding: 15px;
+  }
+
+  .station-title {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+  }
+
+  .station-title h1 {
+    font-size: 24px;
+  }
+
+  .station-meta {
+    gap: 16px;
+  }
+
+  .technical-diagram {
+    padding: 15px;
+  }
+}

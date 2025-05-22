@@ -1,0 +1,20 @@
+<div class="map-container">
+  @if (loading) {
+    <div class="loading-overlay">
+      <div class="loading-spinner"></div>
+      <p>Loading transportation network...</p>
+    </div>
+  }
+
+  @if (error) {
+    <div class="error-overlay">
+      <div class="error-message">
+        <h3>Error Loading Map</h3>
+        <p>{{ error }}</p>
+        <button (click)="loadStations()" class="retry-button">Retry</button>
+      </div>
+    </div>
+  }
+
+  <div id="map" class="map"></div>
+</div>

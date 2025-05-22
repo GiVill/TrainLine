@@ -1,0 +1,4 @@
+id,name,zoneId,status,platforms,lat,lng
+6,CAGLIARI,6,Active,10,39.22,9.12
+420,SASSARI,420,Active,8,40.73,8.56
+123,NUORO,123,Maintenance,4,40.32,9.33

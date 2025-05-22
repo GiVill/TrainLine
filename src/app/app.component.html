@@ -1,0 +1,23 @@
+<div class="app-container">
+  <app-header></app-header>
+
+  <div class="main-content">
+    <app-sidebar
+      [showBackButton]="showStationDetail()"
+      (stationSelected)="onStationSelected($event)"
+      (backToStations)="onBackToStations()">
+    </app-sidebar>
+
+    <div class="content-area">
+      <div class="map-container">
+        <app-map (stationSelected)="onStationSelected($event)"></app-map>
+      </div>
+
+      @if (showStationDetail() && selectedStation()) {
+        <div class="station-detail-panel">
+          <app-station-detail [station]="selectedStation()!"></app-station-detail>
+        </div>
+      }
+    </div>
+  </div>
+</div>

@@ -1,0 +1,73 @@
+<div class="sidebar">
+  <div class="sidebar-header">
+    @if (showBackButton()) {
+      <button class="back-button" (click)="onBackClick()">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <polyline points="15,18 9,12 15,6"></polyline>
+        </svg>
+        Back to Stations
+      </button>
+    } @else {
+      <h2>Network Overview</h2>
+    }
+  </div>
+
+  @if (!showBackButton()) {
+    <div class="search-container">
+      <input
+        type="text"
+        placeholder="Search stations, routes, trips..."
+        class="search-input"
+        [value]="searchTerm()"
+        (input)="onSearchChange($any($event.target).value)"
+      />
+      <svg class="search-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <circle cx="11" cy="11" r="8"></circle>
+        <path d="m21 21-4.35-4.35"></path>
+      </svg>
+    </div>
+
+    <div class="stations-section">
+      <h3>MAJOR STATIONS</h3>
+
+      @if (loading()) {
+        <div class="loading-state">
+          <div class="loading-spinner"></div>
+          <p>Loading stations...</p>
+        </div>
+      }
+
+      @if (error()) {
+        <div class="error-state">
+          <p>{{ error() }}</p>
+          <button (click)="loadStations()" class="retry-button">Retry</button>
+        </div>
+      }
+
+      @if (!loading() && !error()) {
+        <div class="stations-list">
+          @for (station of filteredStations(); track station.stop_id) {
+            <div class="station-item" (click)="onStationClick(station)">
+              <div class="station-info">
+                <div class="station-name">{{ station.stop_name }}</div>
+                <div class="station-details">
+                  <span class="zone-id">Zona ID: {{ station.zone_id }}</span>
+                  <span class="platform-count">Stazione Ferroviaria</span>
+                </div>
+              </div>
+              <div class="station-status">
+                <span class="status-badge status-active">
+                  Attiva
+                </span>
+              </div>
+            </div>
+          } @empty {
+            <div class="no-results">
+              <p>No stations found matching "{{ searchTerm() }}"</p>
+            </div>
+          }
+        </div>
+      }
+    </div>
+  }
+</div>

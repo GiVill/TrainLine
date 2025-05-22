@@ -1,0 +1,49 @@
+.header {
+  background-color: #C41E3A;
+  color: white;
+  padding: 0;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.header-content {
+  display: flex;
+  align-items: center;
+  padding: 12px 20px;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.logo {
+  margin-right: 20px;
+}
+
+.logo-text {
+  font-size: 24px;
+  font-weight: bold;
+  letter-spacing: 2px;
+  background-color: white;
+  color: #C41E3A;
+  padding: 4px 12px;
+  border-radius: 4px;
+}
+
+.header-title h1 {
+  margin: 0;
+  font-size: 20px;
+  font-weight: 500;
+}
+
+@media (max-width: 768px) {
+  .header-content {
+    padding: 10px 15px;
+  }
+
+  .logo-text {
+    font-size: 18px;
+    padding: 3px 8px;
+  }
+
+  .header-title h1 {
+    font-size: 16px;
+  }
+}
