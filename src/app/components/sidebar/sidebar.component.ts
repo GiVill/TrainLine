@@ -1,8 +1,8 @@
 import { Component, OnInit, signal, input, output, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { Station } from '../../model/station ';
-import { StationService } from '../../Services/station.service';
+import { Station } from '../../model/models ';
+import { StationService } from '../../services/station.service';
 
 
 @Component({

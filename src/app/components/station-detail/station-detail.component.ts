@@ -1,6 +1,6 @@
 import { Component, input } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { Station } from '../../model/station ';
+import { Station } from '../../model/models ';
 
 
 @Component({

@@ -4,7 +4,7 @@ import { HeaderComponent } from './Components/header/header.component';
 import { SidebarComponent } from './Components/sidebar/sidebar.component';
 import { MapComponent } from './Components/map/map.component';
 import { StationDetailComponent } from './Components/station-detail/station-detail.component';
-import { Station } from './model/station ';
+import { Station } from './model/models ';
 
 @Component({
   selector: 'app-root',

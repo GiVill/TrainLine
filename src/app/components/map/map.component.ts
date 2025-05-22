@@ -1,7 +1,7 @@
 import { Component, OnInit, OnDestroy, output, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { Station } from '../../model/station ';
-import { StationService } from '../../Services/station.service';
+import { StationService } from '../../services/station.service';
+import { Station } from '../../model/models ';
 
 
 declare var L: any;
@@ -24,8 +24,11 @@ export class MapComponent implements OnInit, OnDestroy {
   error = '';
 
   ngOnInit() {
-    this.loadStations();
-    this.initializeMap();
+    // Aspetta che il DOM sia pronto prima di inizializzare la mappa
+    setTimeout(() => {
+      this.initializeMap();
+      this.loadStations();
+    }, 100);
   }
 
   ngOnDestroy() {
@@ -79,7 +82,7 @@ export class MapComponent implements OnInit, OnDestroy {
         marker.addTo(this.map);
         this.markers.push(marker);
       } catch (error) {
-        console.warn('Errore nell\'aggiunta del marcatore per', station.stop_name, error);
+        console.error('Errore nell\'aggiunta del marcatore per', station.stop_name, error);
       }
     });
 
