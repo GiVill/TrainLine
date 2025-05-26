@@ -1,118 +1,140 @@
-<div class="station-detail">
-  <div class="station-header">
-    <div class="station-title">
-      <h1>{{ station().stop_name }}</h1>
-      <!-- <span class="status-badge status-active">
-        Attiva
-      </span> -->
+<div class="station-detail" [class.expanded]="isExpanded()">
+  <!-- Header compatto sempre visibile -->
+  <div class="station-header-compact">
+    <div class="station-title-compact">
+      <h2>{{ station().stop_name }}</h2>
+      <button 
+        class="expand-toggle" 
+        (click)="toggleExpanded()"
+        [attr.aria-expanded]="isExpanded()"
+        [attr.aria-label]="isExpanded() ? 'Nascondi dettagli' : 'Mostra dettagli'"
+      >
+        <svg 
+          class="expand-icon" 
+          [class.rotated]="isExpanded()"
+          width="20" 
+          height="20" 
+          viewBox="0 0 24 24" 
+          fill="none" 
+          stroke="currentColor" 
+          stroke-width="2"
+        >
+          <polyline points="6,9 12,15 18,9"></polyline>
+        </svg>
+      </button>
     </div>
-    <div class="station-meta">
-      <div class="meta-item">
+    
+    <!-- Informazioni essenziali sempre visibili -->
+    <div class="station-meta-compact">
+      <div class="meta-item-compact">
         <span class="meta-label">Zona ID:</span>
         <span class="meta-value">{{ station().zone_id }}</span>
       </div>
-      <div class="meta-item">
+      <div class="meta-item-compact">
         <span class="meta-label">Tipo:</span>
         <span class="meta-value">Stazione Ferroviaria</span>
       </div>
-      <div class="meta-item">
+      <div class="meta-item-compact">
         <span class="meta-label">Coordinate:</span>
-        <span class="meta-value">{{ station().stop_lat }}, {{ station().stop_lon }}</span>
+        <span class="meta-value">{{ station().stop_lat | number:'1.6-6' }}, {{ station().stop_lon | number:'1.6-6' }}</span>
       </div>
     </div>
   </div>
 
-  <div class="station-content">
-    <div class="diagram-section">
-      <h2>Station Layout</h2>
-      <div class="technical-diagram">
-        <!-- Technical diagram representation -->
-        <svg class="station-diagram" viewBox="0 0 800 400">
-          <!-- Main station building -->
-          <rect x="350" y="150" width="100" height="100" fill="#e9ecef" stroke="#495057" stroke-width="2"/>
-          <text x="400" y="205" text-anchor="middle" font-size="12" fill="#495057">Station</text>
+  <!-- Sezione dettagliata espandibile -->
+  <div class="station-detail-expanded" [class.visible]="isExpanded()">
+    <div class="station-content">
+      <div class="diagram-section">
+        <h3>Station Layout</h3>
+        <div class="technical-diagram">
+          <!-- Technical diagram representation -->
+          <svg class="station-diagram" viewBox="0 0 800 400">
+            <!-- Main station building -->
+            <rect x="350" y="150" width="100" height="100" fill="#e9ecef" stroke="#495057" stroke-width="2"/>
+            <text x="400" y="205" text-anchor="middle" font-size="12" fill="#495057">Station</text>
 
-          <!-- Platform tracks -->
-          @for (platform of [1,2,3]; track $index) {
-            <g [attr.transform]="'translate(0, ' + (50 + $index * 40) + ')'">
-              <!-- Platform -->
-              <rect x="100" y="0" width="600" height="20" fill="#6c757d"/>
-              <text x="110" y="15" font-size="10" fill="white">Binario {{ $index + 1 }}</text>
+            <!-- Platform tracks -->
+            @for (platform of [1,2,3]; track $index) {
+              <g [attr.transform]="'translate(0, ' + (50 + $index * 40) + ')'">
+                <!-- Platform -->
+                <rect x="100" y="0" width="600" height="20" fill="#6c757d"/>
+                <text x="110" y="15" font-size="10" fill="white">Binario {{ $index + 1 }}</text>
 
-              <!-- Rail tracks -->
-              <line x1="50" y1="25" x2="750" y2="25" stroke="#343a40" stroke-width="3"/>
-              <line x1="50" y1="30" x2="750" y2="30" stroke="#343a40" stroke-width="3"/>
+                <!-- Rail tracks -->
+                <line x1="50" y1="25" x2="750" y2="25" stroke="#343a40" stroke-width="3"/>
+                <line x1="50" y1="30" x2="750" y2="30" stroke="#343a40" stroke-width="3"/>
 
-              <!-- Platform markers -->
-              @for (marker of [1,2,3,4,5]; track marker) {
-                <circle [attr.cx]="150 + marker * 100" cy="10" r="3" fill="#C41E3A"/>
-              }
-            </g>
-          }
+                <!-- Platform markers -->
+                @for (marker of [1,2,3,4,5]; track marker) {
+                  <circle [attr.cx]="150 + marker * 100" cy="10" r="3" fill="#C41E3A"/>
+                }
+              </g>
+            }
 
-          <!-- Access paths -->
-          <line x1="400" y1="150" x2="400" y2="50" stroke="#6c757d" stroke-width="2" stroke-dasharray="5,5"/>
-          <text x="410" y="100" font-size="10" fill="#6c757d">Access</text>
+            <!-- Access paths -->
+            <line x1="400" y1="150" x2="400" y2="50" stroke="#6c757d" stroke-width="2" stroke-dasharray="5,5"/>
+            <text x="410" y="100" font-size="10" fill="#6c757d">Access</text>
 
-          <!-- Coordinates -->
-          <text x="20" y="30" font-size="10" fill="#6c757d">N ↑</text>
-          <text x="20" y="380" font-size="10" fill="#6c757d">Coordinate: {{ station().stop_lat }}, {{ station().stop_lon }}</text>
-        </svg>
+            <!-- Coordinates -->
+            <text x="20" y="30" font-size="10" fill="#6c757d">N ↑</text>
+            <text x="20" y="380" font-size="10" fill="#6c757d">Coordinate: {{ station().stop_lat }}, {{ station().stop_lon }}</text>
+          </svg>
+        </div>
       </div>
-    </div>
 
-    <div class="info-panels">
-      <div class="info-panel">
-        <h3>Platform Information</h3>
-        <div class="platform-list">
-          @for (platform of [1,2,3]; track $index) {
-            <div class="platform-item">
-              <div class="platform-number">{{ $index + 1 }}</div>
-              <div class="platform-details">
-                <div class="platform-name">Binario {{ $index + 1 }}</div>
-                <div class="platform-status">Attivo</div>
+      <div class="info-panels">
+        <div class="info-panel">
+          <h4>Platform Information</h4>
+          <div class="platform-list">
+            @for (platform of [1,2,3]; track $index) {
+              <div class="platform-item">
+                <div class="platform-number">{{ $index + 1 }}</div>
+                <div class="platform-details">
+                  <div class="platform-name">Binario {{ $index + 1 }}</div>
+                  <div class="platform-status">Attivo</div>
+                </div>
               </div>
+            }
+          </div>
+        </div>
+
+        <div class="info-panel">
+          <h4>Technical Specifications</h4>
+          <div class="tech-specs">
+            <div class="spec-item">
+              <span class="spec-label">Track Gauge:</span>
+              <span class="spec-value">1435 mm (Standard)</span>
             </div>
-          }
-        </div>
-      </div>
-
-      <div class="info-panel">
-        <h3>Technical Specifications</h3>
-        <div class="tech-specs">
-          <div class="spec-item">
-            <span class="spec-label">Track Gauge:</span>
-            <span class="spec-value">1435 mm (Standard)</span>
-          </div>
-          <div class="spec-item">
-            <span class="spec-label">Electrification:</span>
-            <span class="spec-value">25 kV AC</span>
-          </div>
-          <div class="spec-item">
-            <span class="spec-label">Signaling:</span>
-            <span class="spec-value">ERTMS Level 2</span>
-          </div>
-          <div class="spec-item">
-            <span class="spec-label">Platform Length:</span>
-            <span class="spec-value">250m</span>
+            <div class="spec-item">
+              <span class="spec-label">Electrification:</span>
+              <span class="spec-value">25 kV AC</span>
+            </div>
+            <div class="spec-item">
+              <span class="spec-label">Signaling:</span>
+              <span class="spec-value">ERTMS Level 2</span>
+            </div>
+            <div class="spec-item">
+              <span class="spec-label">Platform Length:</span>
+              <span class="spec-value">250m</span>
+            </div>
           </div>
         </div>
-      </div>
 
-      <div class="info-panel">
-        <h3>Operational Status</h3>
-        <div class="operational-info">
-          <div class="status-item">
-            <span class="status-indicator active"></span>
-            <span>All platforms operational</span>
-          </div>
-          <div class="status-item">
-            <span class="status-indicator active"></span>
-            <span>Signaling systems functional</span>
-          </div>
-          <div class="status-item">
-            <span class="status-indicator active"></span>
-            <span>Power supply stable</span>
+        <div class="info-panel">
+          <h4>Operational Status</h4>
+          <div class="operational-info">
+            <div class="status-item">
+              <span class="status-indicator active"></span>
+              <span>All platforms operational</span>
+            </div>
+            <div class="status-item">
+              <span class="status-indicator active"></span>
+              <span>Signaling systems functional</span>
+            </div>
+            <div class="status-item">
+              <span class="status-indicator active"></span>
+              <span>Power supply stable</span>
+            </div>
           </div>
         </div>
       </div>

@@ -24,7 +24,7 @@
 }
 
 .station-detail-panel {
-  height: 500px;
+  height: auto;
   overflow-y: auto;
   border-top: 2px solid #dc3545;
   background: white;
