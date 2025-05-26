@@ -35,6 +35,7 @@ export class SidebarComponent implements OnInit {
   // Input/Output
   showBackButton = input<boolean>(false);
   stationSelected = output<Station>();
+  stationFocused = output<Station>(); // Nuovo output per il focus sulla mappa
   backToStations  = output<void>();
 
   // Dati e stati
@@ -306,9 +307,13 @@ export class SidebarComponent implements OnInit {
     this.filteredRoutes.set(result);
   }
 
-  // Gestione click su stazione
+  // Gestione click su stazione - Modificato per supportare il focus sulla mappa
   onStationClick(s: Station) {
+    // Emetti l'evento per selezionare la stazione
     this.stationSelected.emit(s);
+    
+    // Emetti anche l'evento per il focus sulla mappa
+    this.stationFocused.emit(s);
   }
 
   // Gestione click su route (ora espande/contrae)
@@ -326,5 +331,10 @@ export class SidebarComponent implements OnInit {
   // Gestione back button
   onBackClick() {
     this.backToStations.emit();
+  }
+
+  // Metodo pubblico per permettere la selezione esterna di una stazione
+  public selectStation(station: Station) {
+    this.onStationClick(station);
   }
 }

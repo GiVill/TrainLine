@@ -1,3 +1,5 @@
+/* Aggiungi tutto questo al tuo map.component.css */
+
 .map-container {
   position: relative;
   height: 100%;
@@ -90,4 +92,280 @@
 
 :global(.station-popup .status.inactive) {
   color: #dc3545;
+}
+
+/* ========================================= */
+/* ENHANCED TRAIN STYLES */
+/* ========================================= */
+
+/* Stili per l'icona del treno personalizzata */
+.custom-train-icon,
+.modern-train-icon {
+  background: transparent !important;
+  border: none !important;
+  transition: transform 0.3s ease;
+  filter: drop-shadow(2px 2px 4px rgba(0,0,0,0.3));
+}
+
+.custom-train-icon:hover,
+.modern-train-icon:hover {
+  transform: scale(1.1);
+}
+
+/* Stili per il treno 3D */
+.train-3d-container {
+  background: transparent !important;
+  border: none !important;
+}
+
+.train-3d {
+  position: relative;
+  width: 48px;
+  height: 24px;
+  transform-style: preserve-3d;
+}
+
+.train-body {
+  position: relative;
+  width: 40px;
+  height: 16px;
+  background: linear-gradient(135deg, #c41e3a 0%, #a01729 100%);
+  border-radius: 8px;
+  transform: rotateX(15deg) rotateY(5deg);
+  box-shadow: 
+    0 2px 4px rgba(0,0,0,0.2),
+    inset 0 1px 0 rgba(255,255,255,0.3);
+  animation: trainHover 2s ease-in-out infinite;
+}
+
+.train-front {
+  position: absolute;
+  right: -4px;
+  top: 2px;
+  width: 8px;
+  height: 12px;
+  background: linear-gradient(135deg, #a01729 0%, #801424 100%);
+  border-radius: 0 6px 6px 0;
+  transform: rotateY(10deg);
+}
+
+.train-windows {
+  position: absolute;
+  top: 3px;
+  left: 4px;
+  display: flex;
+  gap: 2px;
+}
+
+.window {
+  width: 6px;
+  height: 6px;
+  background: linear-gradient(135deg, #87ceeb 0%, #4a90e2 100%);
+  border-radius: 1px;
+  opacity: 0.9;
+  animation: windowGlow 3s ease-in-out infinite;
+}
+
+.train-wheels {
+  position: absolute;
+  bottom: -3px;
+  left: 6px;
+  display: flex;
+  gap: 8px;
+}
+
+.wheel {
+  width: 6px;
+  height: 6px;
+  background: radial-gradient(circle, #666 0%, #333 100%);
+  border-radius: 50%;
+  border: 1px solid #999;
+  animation: wheelRotate 0.5s linear infinite;
+}
+
+.train-shadow {
+  position: absolute;
+  bottom: -2px;
+  left: 2px;
+  width: 36px;
+  height: 4px;
+  background: radial-gradient(ellipse, rgba(0,0,0,0.3) 0%, transparent 100%);
+  border-radius: 50%;
+}
+
+/* Animazioni per il treno 3D */
+@keyframes trainHover {
+  0%, 100% { transform: rotateX(15deg) rotateY(5deg) translateY(0px); }
+  50% { transform: rotateX(15deg) rotateY(5deg) translateY(-1px); }
+}
+
+@keyframes windowGlow {
+  0%, 100% { opacity: 0.9; }
+  50% { opacity: 0.6; }
+}
+
+@keyframes wheelRotate {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+/* Effetto movimento per tutte le icone del treno */
+.leaflet-marker-icon {
+  transition: all 0.3s ease !important;
+}
+
+/* Stili aggiuntivi per migliorare la visualizzazione */
+.custom-train-icon svg,
+.modern-train-icon svg {
+  overflow: visible;
+}
+
+/* Effetto pulsante per le tratte selezionate */
+.selected-route {
+  animation: routePulse 2s ease-in-out infinite;
+}
+
+@keyframes routePulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.7; }
+}
+
+/* ——————————— 3D Red-&-White Train Icon ——————————— */
+.train-3d-container{
+  width:64px;
+  height:32px;
+  perspective:120px;
+  pointer-events:none;          /* l’icona non cattura click */
+}
+.train-3d{
+  width:100%;
+  height:100%;
+  position:relative;
+  transform-style:preserve-3d;
+}
+.train-body{
+  position:absolute;
+  bottom:6px;
+  width:100%;
+  height:60%;
+  background:#d71921;                      /* rosso carrozzeria */
+  border-radius:4px;
+  transform:translateZ(10px);
+  box-shadow:0 1px 4px rgba(0,0,0,.35);
+}
+.train-body::before{                        /* fascia bianca */
+  content:'';
+  position:absolute;
+  inset:0;
+  background:linear-gradient(90deg,#fff 33%,transparent 0);
+  background-size:100% 12px;
+  background-repeat:no-repeat;
+  background-position:center;
+  opacity:.9;
+}
+.train-front{                               /* muso inclinato */
+  position:absolute;
+  right:-5%;
+  bottom:0;
+  width:18%;
+  height:100%;
+  background:#a01217;
+  transform:skewY(-12deg) translateZ(8px);
+  border-radius:0 4px 4px 0;
+}
+.train-windows{
+  position:absolute;
+  top:18%;
+  left:8%;
+  display:flex;
+  gap:3px;
+  transform:translateZ(12px);
+}
+.train-windows .window{
+  width:18px;
+  height:9px;
+  border-radius:1px;
+  background:#eaf7ff;
+  box-shadow:inset 0 0 1px #0004;
+}
+.train-wheels{
+  position:absolute;
+  bottom:-3px;
+  left:10%;
+  display:flex;
+  gap:18px;
+  width:80%;
+}
+.wheel{
+  width:12px;
+  height:12px;
+  border-radius:50%;
+  background:#444;
+  border:2px solid #666;
+  animation:wheel-spin 1s linear infinite;
+}
+.train-shadow{                               /* ombra a terra */
+  position:absolute;
+  inset:2px;
+  background:radial-gradient(ellipse at center,
+              rgba(0,0,0,.3) 0%, transparent 70%);
+  transform:translateZ(1px);
+  filter:blur(2px);
+}
+
+@keyframes wheel-spin{
+  to{ transform:rotate(360deg); }
+}
+
+/* ——— Train icon based on a PNG ——— */
+.train-png-icon {
+  filter: drop-shadow(2px 2px 4px rgba(0,0,0,0.3));
+  transition: transform 0.3s ease;
+}
+
+.train-png-icon:hover {
+  transform: scale(1.05);
+}
+
+/* Container per l'icona PNG migliorata */
+.enhanced-train-png-container {
+  background: transparent !important;
+  border: none !important;
+}
+
+/* Stili per il div che contiene l'immagine PNG */
+.enhanced-png-train {
+  position: relative;
+  background-size: contain !important;
+  background-repeat: no-repeat !important;
+  background-position: center !important;
+}
+
+.enhanced-png-train:hover {
+  transform: scale(1.05) !important;
+}
+
+/* Animazione per il treno in movimento */
+.train-moving {
+  animation: trainPulse 2s ease-in-out infinite;
+}
+
+@keyframes trainPulse {
+  0%, 100% { 
+    filter: drop-shadow(2px 2px 4px rgba(0,0,0,0.3));
+  }
+  50% { 
+    filter: drop-shadow(2px 2px 8px rgba(196,30,58,0.4));
+  }
+}
+
+/* Assicurati che l'icona sia sempre visibile sopra altri elementi */
+.leaflet-marker-icon.enhanced-train-png-container {
+  z-index: 1000 !important;
+}
+
+/* Transizione smooth per la rotazione */
+.enhanced-png-train {
+  transition: transform 0.5s ease !important;
+  transform-origin: center center !important;
 }
