@@ -1,4 +1,4 @@
-import { Component, signal } from '@angular/core';
+import { Component, signal, ViewChild } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { HeaderComponent } from './Components/header/header.component';
 import { SidebarComponent } from './Components/sidebar/sidebar.component';
@@ -20,12 +20,23 @@ import { Station } from './model/models ';
   styleUrls: ['./app.component.css']
 })
 export class AppComponent {
+  @ViewChild('mapComponent') mapComponent!: MapComponent;
+  
   selectedStation = signal<Station | null>(null);
   showStationDetail = signal<boolean>(false);
 
   onStationSelected(station: Station) {
     this.selectedStation.set(station);
     this.showStationDetail.set(true);
+  }
+
+  // Nuovo metodo per gestire il focus sulla mappa
+  onStationFocused(station: Station) {
+    console.log('Focus su stazione dalla sidebar:', station);
+    // Chiama il metodo focusOnStation della mappa
+    if (this.mapComponent) {
+      this.mapComponent.focusOnStation(station);
+    }
   }
 
   onBackToStations() {

@@ -5,12 +5,16 @@
     <app-sidebar
       [showBackButton]="showStationDetail()"
       (stationSelected)="onStationSelected($event)"
+      (stationFocused)="onStationFocused($event)"
       (backToStations)="onBackToStations()">
     </app-sidebar>
 
     <div class="content-area">
       <div class="map-container">
-        <app-map (stationSelected)="onStationSelected($event)"></app-map>
+        <app-map 
+          #mapComponent
+          (stationSelected)="onStationSelected($event)">
+        </app-map>
       </div>
 
       @if (showStationDetail() && selectedStation()) {
