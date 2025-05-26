@@ -43,4 +43,15 @@ export class AppComponent {
     this.showStationDetail.set(false);
     this.selectedStation.set(null);
   }
+
+  // app.component.ts
+  onRouteSelected(shapeId: string) {
+    if (this.mapComponent) {
+      this.mapComponent.selectRoute(shapeId);
+      
+      // Opzionale: nascondi il pannello dettaglio stazione
+      this.showStationDetail.set(false);
+      this.selectedStation.set(null);
+    }
+  }
 }

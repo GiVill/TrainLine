@@ -37,6 +37,7 @@ export class SidebarComponent implements OnInit {
   stationSelected = output<Station>();
   stationFocused = output<Station>(); // Nuovo output per il focus sulla mappa
   backToStations  = output<void>();
+  routeSelected = output<string>();
 
   // Dati e stati
   stations         = signal<Station[]>([]);
@@ -325,7 +326,10 @@ export class SidebarComponent implements OnInit {
         : route
     );
     this.routes.set(updatedRoutes);
-    this.applyFilters(); // Riapplica i filtri per aggiornare la vista
+    this.applyFilters();
+    
+    // Aggiungi questa linea per emettere l'evento
+    this.routeSelected.emit(r.shape_id);
   }
 
   // Gestione back button

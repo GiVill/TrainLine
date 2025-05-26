@@ -6,7 +6,8 @@
       [showBackButton]="showStationDetail()"
       (stationSelected)="onStationSelected($event)"
       (stationFocused)="onStationFocused($event)"
-      (backToStations)="onBackToStations()">
+      (backToStations)="onBackToStations()"
+      (routeSelected)="onRouteSelected($event)">
     </app-sidebar>
 
     <div class="content-area">

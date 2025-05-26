@@ -204,7 +204,7 @@ export class MapComponent implements OnInit, OnDestroy {
     });
   }
 
-  private selectRoute(shapeId: string) {
+  public selectRoute(shapeId: string) {
     // Se c'è già una tratta in esecuzione, assicurati che tutto torni visibile prima di nascondere di nuovo
     if (this.selectedRouteId !== shapeId) {
       this.stopTrainAnimation();
@@ -304,8 +304,8 @@ export class MapComponent implements OnInit, OnDestroy {
     this.stopTrainAnimation(false);
 
     // Puoi scegliere tra due versioni:
-    //const trainIcon = this.createPngTrainIcon();         // Versione semplice con L.icon
-    const trainIcon = this.createEnhancedPngTrainIcon();    // Versione con effetti CSS
+    const trainIcon = this.createPngTrainIcon();         // Versione semplice con L.icon
+    //const trainIcon = this.createEnhancedPngTrainIcon();    // Versione con effetti CSS
 
     this.trainMarker = L.marker(points[0], { 
       icon: trainIcon,
