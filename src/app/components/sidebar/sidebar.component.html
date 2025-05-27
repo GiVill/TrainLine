@@ -1,9 +1,8 @@
 <div class="sidebar">
-
+  <!-- ───── Header / Back button ───── -->
   <div class="sidebar-header">
     @if (showBackButton()) {
       <button class="back-button" (click)="onBackClick()">
-        <!-- icona back -->
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
           <polyline points="15,18 9,12 15,6"></polyline>
         </svg>
@@ -15,41 +14,27 @@
   </div>
 
   @if (!showBackButton()) {
-
-    <!-- Search Bar -->
+    <!-- ───── Search Bar ───── -->
     <div class="search-container">
-      <input
-        type="text"
-        class="search-input"
-        placeholder="Search stations, routes, trips..."
-        [value]="searchTerm()"
-        (input)="onSearchChange($any($event.target).value)"
-      />
+      <input type="text" class="search-input"
+             placeholder="Search stations, routes…"
+             [value]="searchTerm()"
+             (input)="onSearchChange($any($event.target).value)" />
       <svg class="search-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
         <circle cx="11" cy="11" r="8"></circle>
         <path d="m21 21-4.35-4.35"></path>
       </svg>
     </div>
 
-    <!-- Category Tabs -->
+    <!-- ───── Category Tabs ───── -->
     <div class="category-tabs">
-      <button
-        class="tab-button"
-        [class.active]="activeCategory() === 'stations'"
-        (click)="onCategoryChange('stations')">
+      <button class="tab-button" [class.active]="activeCategory() === 'stations'" (click)="onCategoryChange('stations')">
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
           <circle cx="12" cy="12" r="3"></circle>
-          <circle cx="12" cy="1" r="1"></circle>
-          <circle cx="12" cy="23" r="1"></circle>
-          <circle cx="4.22" cy="4.22" r="1"></circle>
-          <circle cx="19.78" cy="19.78" r="1"></circle>
         </svg>
         Stazioni
       </button>
-      <button
-        class="tab-button"
-        [class.active]="activeCategory() === 'routes'"
-        (click)="onCategoryChange('routes')">
+      <button class="tab-button" [class.active]="activeCategory() === 'routes'" (click)="onCategoryChange('routes')">
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
           <path d="M3 12h18m-9-9l9 9-9 9"></path>
         </svg>
@@ -57,7 +42,7 @@
       </button>
     </div>
 
-    <!-- Zone Filter Section -->
+    <!-- ───── Zone Filter ───── -->
     <div class="zone-filter-section">
       <div class="zone-filter-header">
         <span class="filter-label">Filtra per Zona</span>
@@ -71,12 +56,8 @@
           </button>
         }
       </div>
-
       <div class="zone-selector">
-        <select
-          class="zone-dropdown"
-          [value]="selectedZone()"
-          (change)="onZoneSelect($any($event.target).value)">
+        <select class="zone-dropdown" [value]="selectedZone()" (change)="onZoneSelect($any($event.target).value)">
           <option value="all">Tutte le zone</option>
           @for (zone of availableZones(); track zone) {
             <option [value]="zone">Zona {{ zone }}</option>
@@ -88,191 +69,73 @@
       </div>
     </div>
 
-    <!-- Content Section -->
+    <!-- ───── Content Section ───── -->
     <div class="content-section">
-
-      <!-- Header dinamico -->
       <div class="section-header">
         @if (activeCategory() === 'stations') {
-          <h3>STAZIONI</h3>
-          <span class="count-badge">{{ filteredStations().length }}</span>
+          <h3>STAZIONI</h3><span class="count-badge">{{ filteredStations().length }}</span>
         } @else {
-          <h3>TRATTE</h3>
-          <span class="count-badge">{{ filteredRoutes().length }}</span>
+          <h3>TRATTE</h3><span class="count-badge">{{ filteredRoutes().length }}</span>
         }
       </div>
 
-      <!-- Loading/Error States -->
       @if (loading()) {
-        <div class="loading-state">
-          <div class="loading-spinner"></div>
-          <p>Caricamento in corso...</p>
-        </div>
+        <div class="loading-state"><div class="loading-spinner"></div><p>Caricamento…</p></div>
       }
       @if (error()) {
-        <div class="error-state">
-          <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1">
-            <circle cx="12" cy="12" r="10"></circle>
-            <line x1="15" y1="9" x2="9" y2="15"></line>
-            <line x1="9" y1="9" x2="15" y2="15"></line>
-          </svg>
-          <p>{{ error() }}</p>
-          <button class="retry-button" (click)="ngOnInit()">Riprova</button>
-        </div>
+        <div class="error-state"><p>{{ error() }}</p><button (click)="ngOnInit()">Riprova</button></div>
       }
 
-      <!-- Content List -->
       @if (!loading() && !error()) {
-
-        <!-- Stations List -->
+        <!-- ────────── Stations List ────────── -->
         @if (activeCategory() === 'stations') {
           <div class="items-list">
             @for (station of filteredStations(); track station.stop_id) {
-              <div class="station-item" (click)="onStationClick(station)" tabindex="0" role="button">
-                <div class="item-icon station-icon">
-                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                    <circle cx="12" cy="12" r="3"></circle>
-                    <circle cx="12" cy="1" r="1"></circle>
-                    <circle cx="12" cy="23" r="1"></circle>
-                    <circle cx="4.22" cy="4.22" r="1"></circle>
-                    <circle cx="19.78" cy="19.78" r="1"></circle>
-                  </svg>
-                </div>
+              <div class="station-item" tabindex="0" role="button" (click)="onStationClick(station)">
+                <div class="item-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"></circle></svg></div>
                 <div class="item-info">
                   <div class="item-name">{{ station.stop_name }}</div>
-                  <div class="item-details">
-                    <span class="zone-badge">Zona {{ station.zone_id }}</span>
-                    <span class="type-label">Stazione Ferroviaria</span>
-                  </div>
+                  <div class="item-details"><span class="zone-badge">Zona {{ station.zone_id }}</span></div>
                 </div>
-                <div class="item-arrow">
-                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                    <polyline points="9,18 15,12 9,6"></polyline>
-                  </svg>
-                </div>
+                <div class="item-arrow"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9,18 15,12 9,6"></polyline></svg></div>
               </div>
             } @empty {
-              <div class="no-results">
-                <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1">
-                  <circle cx="11" cy="11" r="8"></circle>
-                  <path d="m21 21-4.35-4.35"></path>
-                </svg>
-                <p>Nessuna stazione trovata</p>
-                @if (searchTerm()) {
-                  <small>per "{{ searchTerm() }}"</small>
-                } @else if (selectedZone() !== 'all') {
-                  <small>nella zona {{ selectedZone() }}</small>
-                }
-              </div>
+              <p class="no-results">Nessuna stazione trovata</p>
             }
           </div>
         }
 
-        <!-- Routes List -->
+        <!-- ────────── Routes List ────────── -->
         @if (activeCategory() === 'routes') {
           <div class="items-list">
-            @for (route of filteredRoutes(); track route.shape_id) {
+            @for (route of filteredRoutes(); track route.shapeId) {
               <div class="route-item-container">
-                <div class="route-item" (click)="onRouteClick(route)" tabindex="0" role="button">
-                  <div class="item-icon route-icon">
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                      <path d="M3 12h18m-9-9l9 9-9 9"></path>
-                    </svg>
-                  </div>
+                <div class="route-item" tabindex="0" role="button" (click)="onRouteClick(route)">
+                  <div class="item-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12h18m-9-9l9 9-9 9"></path></svg></div>
                   <div class="item-info">
-                    <div class="item-name">Tratta {{ route.shape_id }}</div>
+                    <div class="item-name">{{ route.name }}</div>
                     <div class="item-details">
-                      <span class="stations-count">{{ route.stations_count }} punti</span>
-                      @if (!route.expanded) {
-                        <div class="zones-list">
-                          @for (zone of route.zones; track zone) {
-                            <span class="zone-mini">Z{{ zone }}</span>
-                          }
-                        </div>
-                      }
-                      @if (route.expanded) {
-                        <span class="route-summary">{{ route.departure_station }} → {{ route.arrival_station }}</span>
-                      }
+                      <span class="stations-count">{{ route.stops.length }} fermate</span>
+                      <span class="route-summary" *ngIf="!route.expanded">{{ route.origin.stop_name }} → {{ route.destination.stop_name }}</span>
                     </div>
                   </div>
-                  <div class="item-arrow" [class.expanded]="route.expanded">
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                      <polyline points="6,9 12,15 18,9"></polyline>
-                    </svg>
-                  </div>
+                  <div class="item-arrow" [class.expanded]="route.expanded"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6,9 12,15 18,9"></polyline></svg></div>
                 </div>
 
-                <!-- Route Details - Expandable Section -->
                 @if (route.expanded) {
                   <div class="route-details">
-                    <div class="detail-row">
-                      <span class="detail-label">Partenza</span>
-                      <span class="detail-value">{{ route.departure_station || 'Non disponibile' }}</span>
-                    </div>
-                    <div class="detail-row">
-                      <span class="detail-label">Arrivo</span>
-                      <span class="detail-value">{{ route.arrival_station || 'Non disponibile' }}</span>
-                    </div>
-                    @if (route.distance_km) {
-                      <div class="detail-row">
-                        <span class="detail-label">Distanza</span>
-                        <span class="detail-value">{{ route.distance_km }} km</span>
-                      </div>
-                    }
-                    <div class="detail-row">
-                      <span class="detail-label">Zone</span>
-                      <div class="zones-list">
-                        @for (zone of route.zones; track zone) {
-                          <span class="zone-mini">Z{{ zone }}</span>
-                        }
-                      </div>
-                    </div>
-                    <div class="detail-row">
-                      <span class="detail-label">Punti tracciato</span>
-                      <span class="detail-value">{{ route.stations_count }}</span>
-                    </div>
+                    <div class="detail-row"><span class="detail-label">Partenza</span><span class="detail-value">{{ route.origin.stop_name }}</span></div>
+                    <div class="detail-row"><span class="detail-label">Arrivo</span><span class="detail-value">{{ route.destination.stop_name }}</span></div>
+                    <div class="detail-row"><span class="detail-label">Fermate</span><span class="detail-value">{{ route.stops.length }}</span></div>
                   </div>
                 }
               </div>
             } @empty {
-              <div class="no-results">
-                <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1">
-                  <path d="M3 12h18m-9-9l9 9-9 9"></path>
-                </svg>
-                <p>Nessuna tratta trovata</p>
-                @if (searchTerm()) {
-                  <small>per "{{ searchTerm() }}"</small>
-                } @else if (selectedZone() !== 'all') {
-                  <small>nella zona {{ selectedZone() }}</small>
-                }
-              </div>
+              <p class="no-results">Nessuna tratta trovata</p>
             }
           </div>
         }
-
       }
     </div>
-
-    <!-- Filtri legacy nascosti (mantenuti per compatibilità) -->
-    <div class="legacy-filters" style="display: none;">
-      <div class="filter-container">
-        <div class="filter-group">
-          <label>Filtra per Zona</label>
-          <select (change)="onZoneFilterChange($any($event.target).value)">
-            <option value="">Tutte</option>
-            <option *ngFor="let z of zoneOptions()" [value]="z">{{ z }}</option>
-          </select>
-        </div>
-        <div class="filter-group">
-          <label>Filtra per Tratta</label>
-          <select (change)="onRouteFilterChange($any($event.target).value)">
-            <option value="">Tutte</option>
-            <option *ngFor="let r of routeOptions()" [value]="r">{{ r }}</option>
-          </select>
-        </div>
-        <button class="clear-filters" (click)="clearFilters()">Azzera filtri</button>
-      </div>
-    </div>
-
   }
 </div>

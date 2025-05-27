@@ -1,7 +1,7 @@
 import { Component, OnInit, OnDestroy, output, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { StationService } from '../../services/station.service';
-import { Station } from '../../model/models ';
+import { Station } from '../../model/models';
 
 declare var L: any;
 
@@ -85,14 +85,14 @@ export class MapComponent implements OnInit, OnDestroy {
     this.stations.forEach(station => {
       try {
         const marker = L.marker([station.stop_lat, station.stop_lon])
-          .bindPopup(`
-            <div class="station-popup">
-              <h3>${station.stop_name}</h3>
-              <p>Zona: ${station.zone_id}</p>
-              <p>Stato: <span class="status active">Attiva</span></p>
-              <p>Tipo: Stazione Ferroviaria</p>
-            </div>
-          `)
+          // .bindPopup(`
+          //   <div class="station-popup">
+          //     <h3>${station.stop_name}</h3>
+          //     <p>Zona: ${station.zone_id}</p>
+          //     <p>Stato: <span class="status active">Attiva</span></p>
+          //     <p>Tipo: Stazione Ferroviaria</p>
+          //   </div>
+          // `)
           .on('click', () => this.onStationClick(station));
 
         marker.addTo(this.map);
@@ -112,7 +112,7 @@ export class MapComponent implements OnInit, OnDestroy {
   private onStationClick(station: Station) {
     // Emetti l'evento per la sidebar
     this.stationSelected.emit(station);
-    
+
     // Zoom sulla stazione selezionata
     this.zoomToStation(station);
   }
@@ -266,21 +266,21 @@ export class MapComponent implements OnInit, OnDestroy {
         transition: transform 0.3s ease;
         transform-origin: center center;
       " class="enhanced-png-train"></div>
-      
+
       <style>
         .enhanced-png-train:hover {
           transform: scale(1.05);
         }
-        
+
         @keyframes trainPulse {
-          0%, 100% { 
+          0%, 100% {
             filter: drop-shadow(2px 2px 4px rgba(0,0,0,0.3));
           }
-          50% { 
+          50% {
             filter: drop-shadow(2px 2px 8px rgba(196,30,58,0.4));
           }
         }
-        
+
         .train-moving {
           animation: trainPulse 2s ease-in-out infinite;
         }
@@ -307,7 +307,7 @@ export class MapComponent implements OnInit, OnDestroy {
     const trainIcon = this.createPngTrainIcon();         // Versione semplice con L.icon
     //const trainIcon = this.createEnhancedPngTrainIcon();    // Versione con effetti CSS
 
-    this.trainMarker = L.marker(points[0], { 
+    this.trainMarker = L.marker(points[0], {
       icon: trainIcon,
       zIndexOffset: 1000
     }).addTo(this.map);
@@ -328,12 +328,12 @@ export class MapComponent implements OnInit, OnDestroy {
         this.stopTrainAnimation();
         return;
       }
-      
+
       // Calcola la direzione per ruotare il treno
       const currentPoint = points[idx - 1];
       const nextPoint = points[idx];
       const angle = this.calculateBearing(currentPoint, nextPoint);
-      
+
       // Applica la rotazione al marker
       if (iconElement) {
         const trainDiv = iconElement.querySelector('.enhanced-png-train') || iconElement.querySelector('img');
@@ -344,7 +344,7 @@ export class MapComponent implements OnInit, OnDestroy {
         }
         iconElement.style.zIndex = '1000';
       }
-      
+
       // Muovi il treno al punto successivo
       this.trainMarker.setLatLng(points[idx]);
     }, 1200);
@@ -354,17 +354,17 @@ export class MapComponent implements OnInit, OnDestroy {
   private calculateBearing(point1: [number, number], point2: [number, number]): number {
     const [lat1, lon1] = point1;
     const [lat2, lon2] = point2;
-    
+
     const dLon = (lon2 - lon1) * Math.PI / 180;
     const lat1Rad = lat1 * Math.PI / 180;
     const lat2Rad = lat2 * Math.PI / 180;
-    
+
     const y = Math.sin(dLon) * Math.cos(lat2Rad);
     const x = Math.cos(lat1Rad) * Math.sin(lat2Rad) - Math.sin(lat1Rad) * Math.cos(lat2Rad) * Math.cos(dLon);
-    
+
     let bearing = Math.atan2(y, x) * 180 / Math.PI;
     bearing = (bearing + 360) % 360;
-    
+
     // Aggiusta per la rappresentazione del treno nella tua immagine PNG
     // Potrebbe essere necessario aggiustare questo valore in base all'orientamento
     // della tua immagine (se il treno "guarda" verso l'alto, sinistra, destra, ecc.)

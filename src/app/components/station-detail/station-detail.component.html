@@ -3,27 +3,27 @@
   <div class="station-header-compact">
     <div class="station-title-compact">
       <h2>{{ station().stop_name }}</h2>
-      <button 
-        class="expand-toggle" 
+      <button
+        class="expand-toggle"
         (click)="toggleExpanded()"
         [attr.aria-expanded]="isExpanded()"
         [attr.aria-label]="isExpanded() ? 'Nascondi dettagli' : 'Mostra dettagli'"
       >
-        <svg 
-          class="expand-icon" 
+        <svg
+          class="expand-icon"
           [class.rotated]="isExpanded()"
-          width="20" 
-          height="20" 
-          viewBox="0 0 24 24" 
-          fill="none" 
-          stroke="currentColor" 
+          width="20"
+          height="20"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
           stroke-width="2"
         >
           <polyline points="6,9 12,15 18,9"></polyline>
         </svg>
       </button>
     </div>
-    
+
     <!-- Informazioni essenziali sempre visibili -->
     <div class="station-meta-compact">
       <div class="meta-item-compact">

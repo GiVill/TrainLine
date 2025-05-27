@@ -4,7 +4,7 @@ import { HeaderComponent } from './Components/header/header.component';
 import { SidebarComponent } from './Components/sidebar/sidebar.component';
 import { MapComponent } from './Components/map/map.component';
 import { StationDetailComponent } from './Components/station-detail/station-detail.component';
-import { Station } from './model/models ';
+import { Station } from './model/models';
 
 @Component({
   selector: 'app-root',
@@ -21,7 +21,7 @@ import { Station } from './model/models ';
 })
 export class AppComponent {
   @ViewChild('mapComponent') mapComponent!: MapComponent;
-  
+
   selectedStation = signal<Station | null>(null);
   showStationDetail = signal<boolean>(false);
 
@@ -48,7 +48,7 @@ export class AppComponent {
   onRouteSelected(shapeId: string) {
     if (this.mapComponent) {
       this.mapComponent.selectRoute(shapeId);
-      
+
       // Opzionale: nascondi il pannello dettaglio stazione
       this.showStationDetail.set(false);
       this.selectedStation.set(null);
