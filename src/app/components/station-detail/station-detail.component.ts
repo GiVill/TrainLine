@@ -57,12 +57,13 @@ export class StationDetailComponent implements AfterViewInit, OnDestroy {
 
   private initThree(): void {
     this.scene = new THREE.Scene();
-    this.scene.fog = new THREE.Fog(0xcccccc, 50, 200);
-
-    const width  = this.threeContainer.nativeElement.clientWidth;
+    this.scene.fog = new THREE.Fog(0xcccccc, 50, 200);    const width  = this.threeContainer.nativeElement.clientWidth;
     const height = this.threeContainer.nativeElement.clientHeight;
-    this.camera = new THREE.PerspectiveCamera(75, width / height, 0.1, 1000);
-    this.camera.position.set(50, 30, 50);
+    this.camera = new THREE.PerspectiveCamera(60, width / height, 0.1, 1000);
+    
+    // Set up isometric view
+    const d = 80;
+    this.camera.position.set(d, d * 0.8, d);
     this.camera.lookAt(0, 0, 0);
 
     this.renderer = new THREE.WebGLRenderer({ antialias: true });
@@ -304,7 +305,6 @@ export class StationDetailComponent implements AfterViewInit, OnDestroy {
 
     return trainGroup;
   }
-
   private animate(): void {
     if (this.isAnimating) {
       this.trains.forEach(trainObj => {
@@ -313,11 +313,6 @@ export class StationDetailComponent implements AfterViewInit, OnDestroy {
           trainObj.speed = -trainObj.speed;
         }
       });
-
-      const time = Date.now() * 0.0001;
-      this.camera.position.x = Math.cos(time) * 60;
-      this.camera.position.z = Math.sin(time) * 60;
-      this.camera.lookAt(0, 0, 0);
     }
 
     this.renderer.render(this.scene, this.camera);
