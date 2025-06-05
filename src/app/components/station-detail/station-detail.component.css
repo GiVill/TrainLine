@@ -104,7 +104,7 @@
 
 .station-content {
   padding: 20px;
-  display: grid;
+  display: block;
   grid-template-columns: 2fr 1fr;
   gap: 24px;
 }
@@ -375,3 +375,23 @@
     transform: translateY(0);
   }
 }
+
+/* ================================================== */
+/* Inizio stili per Three.js                          */
+/* ================================================== */
+
+/* Altezza fissa (o minima) per il contenitore della scena 3D */
+.technical-diagram {
+  position: relative;
+  height: 600px; /* Modifica se vuoi più/meno verticalità */
+}
+
+/* Il container Three.js deve occupare il 100% del genitore */
+.three-container {
+  width: 100%;
+  height: 100%;
+}
+
+/* ================================================== */
+/* Fine stili per Three.js                            */
+/* ================================================== */
