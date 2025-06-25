@@ -1,7 +1,6 @@
 /* ========================================= */
-/* STILI PER LA VISTA COMPATTA */
+/* STILI GENERALI */
 /* ========================================= */
-
 .station-detail {
   background-color: white;
   border-radius: 8px;
@@ -10,28 +9,27 @@
   overflow: hidden;
   transition: all 0.3s ease;
 }
+.station-detail.expanded {
+  box-shadow: 0 6px 24px rgba(196, 30, 58, 0.15);
+}
 
-/* Header compatto sempre visibile */
+/* Header compatto */
 .station-header-compact {
   padding: 16px 20px;
   background: linear-gradient(135deg, #C41E3A 0%, #a01729 100%);
   color: white;
 }
-
 .station-title-compact {
   display: flex;
   align-items: center;
   justify-content: space-between;
   margin-bottom: 12px;
 }
-
 .station-title-compact h2 {
   margin: 0;
   font-size: 18px;
   font-weight: 600;
-  color: white;
 }
-
 .expand-toggle {
   background: rgba(255, 255, 255, 0.2);
   border: none;
@@ -45,16 +43,17 @@
   transition: all 0.3s ease;
   color: white;
 }
-
 .expand-toggle:hover {
   background: rgba(255, 255, 255, 0.3);
   transform: scale(1.05);
 }
-
+.expand-toggle:focus {
+  outline: 2px solid rgba(255, 255, 255, 0.5);
+  outline-offset: 2px;
+}
 .expand-icon {
   transition: transform 0.3s ease;
 }
-
 .expand-icon.rotated {
   transform: rotate(180deg);
 }
@@ -65,13 +64,11 @@
   grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
   gap: 12px;
 }
-
 .meta-item-compact {
   display: flex;
   flex-direction: column;
   gap: 2px;
 }
-
 .meta-item-compact .meta-label {
   font-size: 11px;
   font-weight: 500;
@@ -79,95 +76,81 @@
   text-transform: uppercase;
   letter-spacing: 0.5px;
 }
-
 .meta-item-compact .meta-value {
   font-size: 13px;
-  color: white;
   font-weight: 500;
 }
 
-/* ========================================= */
-/* SEZIONE DETTAGLIATA ESPANDIBILE */
-/* ========================================= */
-
+/* Sezione espandibile */
 .station-detail-expanded {
   max-height: 0;
   overflow: hidden;
   transition: max-height 0.4s ease;
   background-color: white;
 }
-
 .station-detail-expanded.visible {
-  max-height: 1000px; /* Valore alto per permettere l'espansione completa */
+  max-height: 1000px;
   transition: max-height 0.6s ease;
 }
+.station-detail-expanded.visible .station-content {
+  animation: fadeInUp 0.4s ease-out;
+}
+@keyframes fadeInUp {
+  from { opacity: 0; transform: translateY(20px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
 
+/* Contenuto interno */
 .station-content {
   padding: 20px;
-  display: block;
+  display: grid;
   grid-template-columns: 2fr 1fr;
   gap: 24px;
 }
 
-/* ========================================= */
-/* STILI PER IL DIAGRAMMA */
-/* ========================================= */
-
+/* Diagramma SVG */
 .diagram-section h3 {
-  margin: 0 0 16px 0;
+  margin: 0 0 16px;
   font-size: 18px;
   font-weight: 600;
   color: #333;
 }
-
-.technical-diagram {
-  background-color: #f8f9fa;
-  border: 1px solid #dee2e6;
-  border-radius: 8px;
-  padding: 16px;
-  overflow-x: auto;
+.map-container {
+  width: 100%;
+  overflow: hidden;
 }
-
-.station-diagram {
+.map-svg {
   width: 100%;
   height: auto;
-  min-width: 600px;
-  background-color: white;
-  border-radius: 4px;
+  display: block;
 }
 
-/* ========================================= */
-/* PANNELLI INFORMATIVI */
-/* ========================================= */
-
+/* Pannelli informativi */
 .info-panels {
   display: flex;
   flex-direction: column;
   gap: 16px;
 }
-
 .info-panel {
   background-color: #f8f9fa;
   border: 1px solid #dee2e6;
   border-radius: 8px;
   padding: 16px;
 }
-
 .info-panel h4 {
-  margin: 0 0 12px 0;
+  margin-bottom: 12px;
   font-size: 14px;
   font-weight: 600;
-  color: #333;
   text-transform: uppercase;
-  letter-spacing: 0.5px;
+  color: #333;
 }
 
+/* Lista binari */
 .platform-list {
   display: flex;
   flex-direction: column;
   gap: 8px;
 }
-
 .platform-item {
   display: flex;
   align-items: center;
@@ -176,7 +159,6 @@
   background-color: white;
   border-radius: 4px;
 }
-
 .platform-number {
   width: 24px;
   height: 24px;
@@ -190,29 +172,12 @@
   font-weight: 600;
 }
 
-.platform-details {
-  flex: 1;
-}
-
-.platform-name {
-  font-weight: 500;
-  color: #333;
-  margin-bottom: 2px;
-  font-size: 13px;
-}
-
-.platform-status {
-  font-size: 11px;
-  color: #28a745;
-  font-weight: 500;
-}
-
+/* Specifiche tecniche */
 .tech-specs {
   display: flex;
   flex-direction: column;
   gap: 6px;
 }
-
 .spec-item {
   display: flex;
   justify-content: space-between;
@@ -220,29 +185,18 @@
   padding: 6px 0;
   border-bottom: 1px solid #e9ecef;
 }
-
 .spec-item:last-child {
   border-bottom: none;
 }
+.spec-label { font-size: 12px; color: #6c757d; }
+.spec-value { font-size: 12px; font-weight: 600; color: #333; }
 
-.spec-label {
-  font-size: 12px;
-  color: #6c757d;
-  font-weight: 500;
-}
-
-.spec-value {
-  font-size: 12px;
-  color: #333;
-  font-weight: 600;
-}
-
+/* Stato operativo */
 .operational-info {
   display: flex;
   flex-direction: column;
   gap: 8px;
 }
-
 .status-item {
   display: flex;
   align-items: center;
@@ -250,148 +204,24 @@
   font-size: 12px;
   color: #333;
 }
-
 .status-indicator {
-  width: 8px;
-  height: 8px;
-  border-radius: 50%;
-  flex-shrink: 0;
+  width: 8px; height: 8px; border-radius: 50%;
 }
+.status-indicator.active  { background-color: #28a745; }
+.status-indicator.warning { background-color: #ffc107; }
+.status-indicator.error   { background-color: #dc3545; }
 
-.status-indicator.active {
-  background-color: #28a745;
-}
-
-.status-indicator.warning {
-  background-color: #ffc107;
-}
-
-.status-indicator.error {
-  background-color: #dc3545;
-}
-
-/* ========================================= */
-/* RESPONSIVE DESIGN */
-/* ========================================= */
-
+/* Responsive */
 @media (max-width: 1024px) {
-  .station-content {
-    grid-template-columns: 1fr;
-  }
-
-  .info-panels {
-    order: -1;
-  }
+  .station-content { grid-template-columns: 1fr; }
+  .info-panels    { order: -1; }
 }
-
 @media (max-width: 768px) {
-  .station-detail {
-    margin: 5px;
-  }
-
-  .station-header-compact {
-    padding: 12px 16px;
-  }
-
-  .station-title-compact h2 {
-    font-size: 16px;
-  }
-
-  .station-meta-compact {
-    grid-template-columns: 1fr;
-    gap: 8px;
-  }
-
-  .station-content {
-    padding: 16px;
-    gap: 16px;
-  }
-
-  .technical-diagram {
-    padding: 12px;
-  }
-
-  .expand-toggle {
-    width: 32px;
-    height: 32px;
-  }
+  .station-content { padding: 16px; gap: 16px; }
+  .expand-toggle   { width: 32px; height: 32px; }
 }
-
 @media (max-width: 480px) {
-  .station-meta-compact {
-    grid-template-columns: 1fr;
-  }
-
-  .meta-item-compact .meta-value {
-    font-size: 12px;
-  }
-
-  .station-title-compact {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 8px;
-  }
-
-  .expand-toggle {
-    align-self: flex-end;
-  }
+  .station-meta-compact { grid-template-columns: 1fr; }
+  .meta-item-compact .meta-value { font-size: 12px; }
+  .station-title-compact { flex-direction: column; gap: 8px; }
 }
-
-/* ========================================= */
-/* ANIMAZIONI E TRANSIZIONI */
-/* ========================================= */
-
-.station-detail:hover {
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
-}
-
-.station-detail.expanded {
-  box-shadow: 0 6px 24px rgba(196, 30, 58, 0.15);
-}
-
-/* Smooth scroll per il contenuto espandibile */
-.station-detail-expanded {
-  scroll-behavior: smooth;
-}
-
-/* Effetto di evidenziazione per il toggle button */
-.expand-toggle:focus {
-  outline: 2px solid rgba(255, 255, 255, 0.5);
-  outline-offset: 2px;
-}
-
-/* Animazione per il contenuto che appare */
-.station-detail-expanded.visible .station-content {
-  animation: fadeInUp 0.4s ease-out;
-}
-
-@keyframes fadeInUp {
-  from {
-    opacity: 0;
-    transform: translateY(20px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-/* ================================================== */
-/* Inizio stili per Three.js                          */
-/* ================================================== */
-
-/* Altezza fissa (o minima) per il contenitore della scena 3D */
-.technical-diagram {
-  position: relative;
-  height: 600px; /* Modifica se vuoi più/meno verticalità */
-}
-
-/* Il container Three.js deve occupare il 100% del genitore */
-.three-container {
-  width: 100%;
-  height: 100%;
-}
-
-/* ================================================== */
-/* Fine stili per Three.js                            */
-/* ================================================== */

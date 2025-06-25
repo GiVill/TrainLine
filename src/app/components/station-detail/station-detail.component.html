@@ -1,7 +1,5 @@
 <div class="station-detail" [class.expanded]="isExpanded()">
-  <!-- ********************** -->
-  <!-- HEADER COMPATTO       -->
-  <!-- ********************** -->
+  <!-- Header compatto -->
   <div class="station-header-compact">
     <div class="station-title-compact">
       <h2>{{ station.stop_name }}</h2>
@@ -26,7 +24,7 @@
       </button>
     </div>
 
-    <!-- Informazioni essenziali -->
+    <!-- Info essenziali -->
     <div class="station-meta-compact">
       <div class="meta-item-compact">
         <span class="meta-label">Zona ID:</span>
@@ -45,20 +43,79 @@
     </div>
   </div>
 
-  <!-- ********************** -->
-  <!-- SEZIONE DETTAGLIATA    -->
-  <!-- ********************** -->
+  <!-- Dettagli espandibili -->
   <div class="station-detail-expanded" [class.visible]="isExpanded()">
     <div class="station-content">
-      <!-- → Diagramma 3D con Three.js ← -->
+      <!-- Mappa SVG con trenino animato -->
       <div class="diagram-section">
-        <h3>Station Layout</h3>
-        <div class="technical-diagram">
-          <!-- Contenitore per la scena Three.js -->
-          <div id="threeContainer" #threeContainer class="three-container"></div>
+        <h3>Station Map</h3>
+        <div class="map-container">
+          <object
+            #mapObject
+            type="image/svg+xml"
+            data="assets/station-map.svg"
+            class="map-svg"
+          ></object>
         </div>
       </div>
 
+      <!-- Pannelli informativi -->
+      <div class="info-panels">
+        <div class="info-panel">
+          <h4>Platform Information</h4>
+          <div class="platform-list">
+            <ng-container *ngFor="let platform of [1,2,3]; let idx = index">
+              <div class="platform-item">
+                <div class="platform-number">{{ idx + 1 }}</div>
+                <div class="platform-details">
+                  <div class="platform-name">Binario {{ idx + 1 }}</div>
+                  <div class="platform-status">Attivo</div>
+                </div>
+              </div>
+            </ng-container>
+          </div>
+        </div>
+
+        <div class="info-panel">
+          <h4>Technical Specifications</h4>
+          <div class="tech-specs">
+            <div class="spec-item">
+              <span class="spec-label">Track Gauge:</span>
+              <span class="spec-value">1435 mm (Standard)</span>
+            </div>
+            <div class="spec-item">
+              <span class="spec-label">Electrification:</span>
+              <span class="spec-value">25 kV AC</span>
+            </div>
+            <div class="spec-item">
+              <span class="spec-label">Signaling:</span>
+              <span class="spec-value">ERTMS Level 2</span>
+            </div>
+            <div class="spec-item">
+              <span class="spec-label">Platform Length:</span>
+              <span class="spec-value">250m</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="info-panel">
+          <h4>Operational Status</h4>
+          <div class="operational-info">
+            <div class="status-item">
+              <span class="status-indicator active"></span>
+              <span>All platforms operational</span>
+            </div>
+            <div class="status-item">
+              <span class="status-indicator active"></span>
+              <span>Signaling systems functional</span>
+            </div>
+            <div class="status-item">
+              <span class="status-indicator active"></span>
+              <span>Power supply stable</span>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
   </div>
+</div>
