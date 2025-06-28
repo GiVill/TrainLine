@@ -1,0 +1,41 @@
+domain parsed
+problem parsed
+grounding..
+grounding time: 27
+aibr preprocessing
+|f|:11
+|x|:0
+|a|:18
+|p|:0
+|e|:0
+h1 setup time (msec): 8
+ g(n)= 1.0 h(n)=8.0
+ g(n)= 2.0 h(n)=7.0
+ g(n)= 3.0 h(n)=6.0
+ g(n)= 4.0 h(n)=5.0
+ g(n)= 5.0 h(n)=4.0
+ g(n)= 6.0 h(n)=3.0
+ g(n)= 7.0 h(n)=2.0
+ g(n)= 8.0 h(n)=1.0
+problem solved
+
+found plan:
+0.0: (open-track track-22)
+1.0: (move start-1 switch-1)
+2.0: (move switch-1 switch-8)
+3.0: (move switch-8 switch-9)
+4.0: (move switch-9 switch-10)
+5.0: (move switch-10 switch-11)
+6.0: (move switch-11 switch-12)
+7.0: (move switch-12 switch-13)
+8.0: (move switch-13 stop-8)
+
+plan-length:9
+metric (search):9.0
+planning time (msec): 28
+heuristic time (msec): 5
+search time (msec): 23
+expanded nodes:10
+states evaluated:11
+number of dead-ends detected:0
+number of duplicates detected:8

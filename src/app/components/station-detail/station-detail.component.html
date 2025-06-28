@@ -37,7 +37,8 @@
       <div class="meta-item-compact">
         <span class="meta-label">Coordinate:</span>
         <span class="meta-value">
-          {{ station.stop_lat | number:'1.6-6' }}, {{ station.stop_lon | number:'1.6-6' }}
+          {{ station.stop_lat | number:'1.6-6' }},
+          {{ station.stop_lon | number:'1.6-6' }}
         </span>
       </div>
     </div>
@@ -46,73 +47,69 @@
   <!-- Dettagli espandibili -->
   <div class="station-detail-expanded" [class.visible]="isExpanded()">
     <div class="station-content">
-      <!-- Mappa SVG con trenino animato -->
-      <div class="diagram-section">
+      <div class="diagram-section" style="grid-column: 1 / -1;">
         <h3>Station Map</h3>
+        
+        <!-- Controlli animazione - solo per la stazione di Cagliari -->
+        <div class="animation-controls" *ngIf="station.stop_name === 'Stazione di CAGLIARI'">
+          <button 
+            class="control-btn start-btn" 
+            (click)="startAnimation()" 
+            [disabled]="isAnimating"
+            [class.disabled]="isAnimating"
+            [title]="isAnimating ? 'Animazione in corso' : 'Avvia o riprendi simulazione'"
+          >
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <polygon points="5,3 19,12 5,21 5,3"></polygon>
+            </svg>
+            {{ (currentEventIndex === 0 && currentEventProgress === 0) ? 'Avvia simulazione' : 'Riprendi simulazione' }}
+          </button>
+          
+          <button 
+            class="control-btn stop-btn" 
+            (click)="stopAnimation()" 
+            [disabled]="!isAnimating"
+            [class.disabled]="!isAnimating"
+            title="Metti in pausa la simulazione"
+          >
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <rect x="6" y="4" width="4" height="16"></rect>
+              <rect x="14" y="4" width="4" height="16"></rect>
+            </svg>
+            Pausa
+          </button>
+
+          <button 
+            class="control-btn reset-btn" 
+            (click)="resetAnimation()" 
+            [disabled]="isAnimating"
+            [class.disabled]="isAnimating"
+            title="Riporta la simulazione all'inizio"
+          >
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <polyline points="23,4 23,10 17,10"></polyline>
+              <polyline points="1,20 1,14 7,14"></polyline>
+              <path d="M20.49,9A9,9,0,0,0,5.64,5.64L1,10m22,4L18.36,18.36A9,9,0,0,1,3.51,15"></path>
+            </svg>
+            Reset
+          </button>
+        </div>
+
         <div class="map-container">
-          <object
-            #mapObject
-            type="image/svg+xml"
-            data="assets/station-map.svg"
-            class="map-svg"
-          ></object>
-        </div>
-      </div>
-
-      <!-- Pannelli informativi -->
-      <div class="info-panels">
-        <div class="info-panel">
-          <h4>Platform Information</h4>
-          <div class="platform-list">
-            <ng-container *ngFor="let platform of [1,2,3]; let idx = index">
-              <div class="platform-item">
-                <div class="platform-number">{{ idx + 1 }}</div>
-                <div class="platform-details">
-                  <div class="platform-name">Binario {{ idx + 1 }}</div>
-                  <div class="platform-status">Attivo</div>
-                </div>
-              </div>
-            </ng-container>
-          </div>
-        </div>
-
-        <div class="info-panel">
-          <h4>Technical Specifications</h4>
-          <div class="tech-specs">
-            <div class="spec-item">
-              <span class="spec-label">Track Gauge:</span>
-              <span class="spec-value">1435 mm (Standard)</span>
-            </div>
-            <div class="spec-item">
-              <span class="spec-label">Electrification:</span>
-              <span class="spec-value">25 kV AC</span>
-            </div>
-            <div class="spec-item">
-              <span class="spec-label">Signaling:</span>
-              <span class="spec-value">ERTMS Level 2</span>
-            </div>
-            <div class="spec-item">
-              <span class="spec-label">Platform Length:</span>
-              <span class="spec-value">250m</span>
-            </div>
-          </div>
-        </div>
-
-        <div class="info-panel">
-          <h4>Operational Status</h4>
-          <div class="operational-info">
-            <div class="status-item">
-              <span class="status-indicator active"></span>
-              <span>All platforms operational</span>
-            </div>
-            <div class="status-item">
-              <span class="status-indicator active"></span>
-              <span>Signaling systems functional</span>
-            </div>
-            <div class="status-item">
-              <span class="status-indicator active"></span>
-              <span>Power supply stable</span>
-            </div>
+          <!-- Mostra l'SVG SOLO per la stazione di Cagliari  -->
+          <div
+            class="map-wrapper"
+            *ngIf="station.stop_name === 'Stazione di CAGLIARI'"
+          >
+            <!-- sostituito <img> con <object>; evento (load) -->
+            <object
+              #mapObject
+              type="image/svg+xml"
+              data="assets/cagliari.svg"
+              class="map-svg"
+              aria-label="Mappa della stazione di Cagliari"
+              (load)="onSvgLoad()"
+            ></object>
           </div>
         </div>
       </div>

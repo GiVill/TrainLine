@@ -171,3 +171,8 @@ a:hover {
     display: none !important;
   }
 }
+
+svg .track-hidden {
+  opacity: 0;
+  transition: opacity 300ms linear;
+}
