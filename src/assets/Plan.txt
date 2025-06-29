@@ -1,118 +1,102 @@
 domain parsed
 problem parsed
 grounding..
-grounding time: 118
+grounding time: 99
 aibr preprocessing
-|f|:367
+|f|:322
 |x|:0
-|a|:703
+|a|:602
 |p|:0
 |e|:0
-h1 setup time (msec): 23
- g(n)= 1.0 h(n)=50.0
- g(n)= 2.0 h(n)=48.0
- g(n)= 3.0 h(n)=47.0
- g(n)= 4.0 h(n)=46.0
- g(n)= 5.0 h(n)=45.0
- g(n)= 6.0 h(n)=43.0
- g(n)= 10.0 h(n)=42.0
- g(n)= 11.0 h(n)=41.0
- g(n)= 12.0 h(n)=39.0
- g(n)= 13.0 h(n)=38.0
- g(n)= 14.0 h(n)=37.0
- g(n)= 15.0 h(n)=35.0
- g(n)= 16.0 h(n)=34.0
- g(n)= 19.0 h(n)=33.0
- g(n)= 20.0 h(n)=32.0
- g(n)= 21.0 h(n)=31.0
- g(n)= 22.0 h(n)=30.0
- g(n)= 23.0 h(n)=29.0
- g(n)= 25.0 h(n)=28.0
- g(n)= 26.0 h(n)=26.0
- g(n)= 27.0 h(n)=25.0
- g(n)= 28.0 h(n)=24.0
- g(n)= 29.0 h(n)=23.0
- g(n)= 30.0 h(n)=22.0
- g(n)= 31.0 h(n)=21.0
- g(n)= 32.0 h(n)=20.0
- g(n)= 33.0 h(n)=19.0
- g(n)= 34.0 h(n)=18.0
- g(n)= 35.0 h(n)=17.0
- g(n)= 36.0 h(n)=16.0
- g(n)= 37.0 h(n)=15.0
- g(n)= 40.0 h(n)=13.0
- g(n)= 41.0 h(n)=11.0
- g(n)= 42.0 h(n)=10.0
- g(n)= 43.0 h(n)=9.0
- g(n)= 45.0 h(n)=7.0
- g(n)= 46.0 h(n)=6.0
- g(n)= 47.0 h(n)=5.0
- g(n)= 48.0 h(n)=4.0
- g(n)= 49.0 h(n)=3.0
- g(n)= 50.0 h(n)=2.0
- g(n)= 51.0 h(n)=1.0
+h1 setup time (msec): 26
+ g(n)= 5.0 h(n)=159.0
+ g(n)= 9.0 h(n)=155.0
+ g(n)= 16.0 h(n)=146.0
+ g(n)= 18.0 h(n)=142.0
+ g(n)= 23.0 h(n)=137.0
+ g(n)= 27.0 h(n)=133.0
+ g(n)= 33.0 h(n)=127.0
+ g(n)= 36.0 h(n)=124.0
+ g(n)= 42.0 h(n)=119.0
+ g(n)= 45.0 h(n)=116.0
+ g(n)= 47.0 h(n)=114.0
+ g(n)= 52.0 h(n)=111.0
+ g(n)= 56.0 h(n)=103.0
+ g(n)= 68.0 h(n)=95.0
+ g(n)= 73.0 h(n)=86.0
+ g(n)= 78.0 h(n)=81.0
+ g(n)= 81.0 h(n)=78.0
+ g(n)= 87.0 h(n)=74.0
+ g(n)= 89.0 h(n)=72.0
+ g(n)= 94.0 h(n)=68.0
+ g(n)= 98.0 h(n)=63.0
+ g(n)= 104.0 h(n)=60.0
+ g(n)= 107.0 h(n)=54.0
+ g(n)= 111.0 h(n)=50.0
+ g(n)= 113.0 h(n)=48.0
+ g(n)= 117.0 h(n)=44.0
+ g(n)= 120.0 h(n)=41.0
+ g(n)= 124.0 h(n)=37.0
+ g(n)= 131.0 h(n)=30.0
+ g(n)= 133.0 h(n)=28.0
+ g(n)= 135.0 h(n)=26.0
+ g(n)= 140.0 h(n)=21.0
+ g(n)= 143.0 h(n)=18.0
+ g(n)= 148.0 h(n)=13.0
+ g(n)= 154.0 h(n)=7.0
+ g(n)= 158.0 h(n)=3.0
 problem solved
 
 found plan:
 0.0: (move t1 start-1 switch-1)
-1.0: (move t1 switch-1 switch-2)
-2.0: (move t1 switch-2 switch-3)
-3.0: (move t1 switch-3 switch-4)
-4.0: (move t1 switch-4 switch-5)
-5.0: (move t1 switch-5 switch-6)
-6.0: (close-track switch-5 switch-6)
-7.0: (close-track switch-11 switch-7)
-8.0: (move t2 start-2 switch-8)
-9.0: (release t4 start-2)
-10.0: (move t2 switch-8 switch-9)
-11.0: (move t2 switch-9 switch-10)
-12.0: (move t2 switch-10 switch-11)
-13.0: (move t2 switch-11 switch-12)
-14.0: (move t2 switch-12 switch-13)
-15.0: (move t2 switch-13 stop-8)
-16.0: (close-track switch-3 switch-9)
-17.0: (move t4 start-2 switch-8)
-18.0: (move t4 switch-8 switch-9)
-19.0: (move t4 switch-9 switch-10)
-20.0: (move t4 switch-10 switch-4)
-21.0: (move t4 switch-4 switch-5)
-22.0: (move t4 switch-5 switch-20)
-23.0: (release t3 start-1)
-24.0: (move t3 start-1 switch-1)
-25.0: (move t3 switch-1 switch-2)
-26.0: (release t5 start-1)
-27.0: (move t5 start-1 switch-1)
-28.0: (move t5 switch-1 switch-8)
-29.0: (move t3 switch-2 switch-3)
-30.0: (move t5 switch-8 switch-9)
-31.0: (move t3 switch-3 switch-4)
-32.0: (move t5 switch-9 switch-10)
-33.0: (move t3 switch-4 switch-5)
-34.0: (move t5 switch-10 switch-11)
-35.0: (move t5 switch-11 switch-12)
-36.0: (move t5 switch-12 stop-7)
-37.0: (close-track stop-8 switch-13)
+1.0: (move t2 start-2 switch-8)
+2.0: (move t2 switch-8 switch-9)
+3.0: (move t2 switch-9 switch-10)
+4.0: (move t2 switch-10 switch-11)
+5.0: (move t2 switch-11 switch-12)
+6.0: (move t2 switch-12 switch-13)
+7.0: (move t1 switch-1 switch-2)
+8.0: (move t1 switch-2 switch-3)
+9.0: (move t2 switch-13 stop-8)
+10.0: (move t1 switch-3 switch-4)
+11.0: (move t1 switch-4 switch-5)
+12.0: (move t1 switch-5 switch-6)
+13.0: (close-track point-5 switch-19)
+14.0: (close-track switch-13 stop-8)
+15.0: (move t1 switch-6 switch-21)
+16.0: (move t1 switch-21 switch-22)
+17.0: (move t1 switch-22 stop-5)
+18.0: (release t3 start-1)
+19.0: (move t3 start-1 switch-1)
+20.0: (move t3 switch-1 switch-2)
+21.0: (move t3 switch-2 switch-3)
+22.0: (move t3 switch-3 switch-4)
+23.0: (move t3 switch-4 switch-5)
+24.0: (move t3 switch-5 switch-6)
+25.0: (move t3 switch-6 switch-21)
+26.0: (move t3 switch-21 point-7)
+27.0: (move t3 point-7 switch-25)
+28.0: (move t3 switch-25 switch-26)
+29.0: (move t3 switch-26 switch-27)
+30.0: (move t3 switch-27 stop-2)
+31.0: (release t4 start-2)
+32.0: (move t4 start-2 switch-8)
+33.0: (move t4 switch-8 switch-9)
+34.0: (move t4 switch-9 switch-3)
+35.0: (move t4 switch-3 switch-4)
+36.0: (move t4 switch-4 switch-5)
+37.0: (move t4 switch-5 switch-20)
 38.0: (move t4 switch-20 switch-21)
 39.0: (move t4 switch-21 switch-22)
 40.0: (move t4 switch-22 switch-23)
-41.0: (move t3 switch-5 switch-20)
-42.0: (move t4 switch-23 stop-4)
-43.0: (move t1 switch-6 switch-21)
-44.0: (move t1 switch-21 switch-22)
-45.0: (move t3 switch-20 switch-21)
-46.0: (move t1 switch-22 stop-5)
-47.0: (move t3 switch-21 point-7)
-48.0: (move t3 point-7 switch-25)
-49.0: (move t3 switch-25 switch-26)
-50.0: (move t3 switch-26 switch-27)
-51.0: (move t3 switch-27 stop-2)
+41.0: (move t4 switch-23 stop-4)
 
-plan-length:52
-metric (search):52.0
-planning time (msec): 2373
-heuristic time (msec): 2277
-search time (msec): 2368
-expanded nodes:137
-states evaluated:6496
+plan-length:42
+metric (search):161.0
+planning time (msec): 1783
+heuristic time (msec): 1705
+search time (msec): 1778
+expanded nodes:170
+states evaluated:6511
 number of dead-ends detected:0
-number of duplicates detected:8037
+number of duplicates detected:11071

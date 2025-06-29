@@ -17,8 +17,28 @@ interface TrackEv   { kind: 'track';   at: number; a: string;  b: string;  statu
 
 type Event = ReleaseEv | MoveEv | TrackEv;
 
+// ────────────────────────────────────────────────────
+// Interfaccia per i commenti dell'animazione
+// ────────────────────────────────────────────────────
+interface AnimationComment {
+  stepNumber: number;
+  time: number;
+  description: string;
+  eventType: 'release' | 'move' | 'track';
+}
+
+// ────────────────────────────────────────────────────
+// Interfaccia per le destinazioni dei treni
+// ────────────────────────────────────────────────────
+interface TrainDestination {
+  trainId: string;
+  destination: string;
+  isArrived?: boolean;
+  isAnimating?: boolean;
+}
+
 const SPEED = 2;                     // fattore di rallentamento/velocità
-const ORIG  = 'data-orig-status';    // attributo dove salviamo lo stato di partenza
+const ORIG  = 'data-orig-status';    // attribute dove salviamo lo stato di partenza
 
 @Component({
   selector: 'app-station-detail',
@@ -50,6 +70,14 @@ export class StationDetailComponent {
 
   private trainImgs = new Map<string, SVGImageElement>();
 
+  // ────────── commenti animazione ──────────
+  animationComments: AnimationComment[] = [];
+  currentComment: AnimationComment | null = null;
+
+  // ────────── destinazioni treni ──────────
+  trainDestinations: TrainDestination[] = [];
+  private trainFinalDestinations = new Map<string, string>(); // Mappa treno -> destinazione finale
+
   // ───────────────────────────────────────── SVG LOAD ─────────────────────────────────────────
   async onSvgLoad() {
     if (this.station.stop_name !== 'Stazione di CAGLIARI') return;
@@ -58,6 +86,8 @@ export class StationDetailComponent {
     if (!this.events.length) {
       const raw = await firstValueFrom(this.http.get('assets/Plan.txt', { responseType: 'text' }));
       this.events = this.parseEvents(raw);
+      this.generateComments();
+      this.extractTrainDestinations(raw);
     }
 
     // 2. Segna lo stato originale dei binari (una sola volta)
@@ -77,6 +107,13 @@ export class StationDetailComponent {
   resetAnimation() {
     this.stopAnimation();
     this.currentIdx = 0;
+    this.currentComment = null;
+
+    // Reset stato destinazioni
+    this.trainDestinations.forEach(dest => {
+      dest.isArrived = false;
+      dest.isAnimating = false;
+    });
 
     // rimuove eventuali trenini
     this.trainImgs.forEach(img => img.remove());
@@ -85,6 +122,131 @@ export class StationDetailComponent {
     // ripristina lo stato originale dei binari e aggiorna visibilità
     this.restoreOriginalTrackStatus();
     this.applyTrackVisibility();
+  }
+
+  // ───────────────────────────────────────── ESTRAZIONE DESTINAZIONI ─────────────────────────────
+  private extractTrainDestinations(planText: string) {
+    const destinations = new Map<string, string>();
+    
+    // Estrae tutti gli eventi di movimento dal piano
+    const moveEvents: { time: number, train: string, from: string, to: string }[] = [];
+    
+    const moveRegex = /([\d.]+)\s*:\s*\(move\s+([^\s]+)\s+([^\s]+)\s+([^\s)]+)\)/gi;
+    
+    for (const match of planText.matchAll(moveRegex)) {
+      moveEvents.push({
+        time: parseFloat(match[1]),
+        train: match[2],
+        from: match[3],
+        to: match[4]
+      });
+    }
+    
+    // Ordina gli eventi per tempo
+    moveEvents.sort((a, b) => a.time - b.time);
+    
+    // Per ogni treno, trova l'ultima destinazione
+    const trainLastDestination = new Map<string, string>();
+    
+    moveEvents.forEach(event => {
+      trainLastDestination.set(event.train, event.to);
+    });
+
+    // Salva le destinazioni finali per uso interno
+    this.trainFinalDestinations = new Map(trainLastDestination);
+    
+    // Converte la mappa in array di oggetti, filtrando solo le destinazioni che sono "stop-"
+    this.trainDestinations = Array.from(trainLastDestination.entries())
+      .filter(([trainId, destination]) => destination.startsWith('stop-'))
+      .map(([trainId, destination]) => ({
+        trainId,
+        destination: this.formatLocationName(destination),
+        isArrived: false,
+        isAnimating: false
+      }));
+    
+    console.log('Destinazioni treni estratte:', this.trainDestinations);
+  }
+
+  // ───────────────────────────────────────── CONTROLLO ARRIVO A DESTINAZIONE ─────────────────────
+  private checkTrainArrival(trainId: string, currentLocation: string) {
+    const finalDestination = this.trainFinalDestinations.get(trainId);
+    
+    if (finalDestination && currentLocation === finalDestination) {
+      // Il treno ha raggiunto la destinazione finale
+      const destinationItem = this.trainDestinations.find(dest => dest.trainId === trainId);
+      
+      if (destinationItem && !destinationItem.isArrived) {
+        console.log(`Treno ${trainId} è arrivato alla destinazione finale: ${finalDestination}`);
+        
+        // Avvia l'animazione di arrivo
+        destinationItem.isAnimating = true;
+        destinationItem.isArrived = false;
+        
+        // Dopo un breve delay, completa l'animazione
+        setTimeout(() => {
+          if (destinationItem) {
+            destinationItem.isAnimating = false;
+            destinationItem.isArrived = true;
+          }
+        }, 2000); // Durata dell'animazione di arrivo
+      }
+    }
+  }
+
+  // ───────────────────────────────────────── GENERAZIONE COMMENTI ─────────────────────────────
+  private generateComments() {
+    this.animationComments = this.events.map((event, index) => ({
+      stepNumber: index + 1,
+      time: event.at,
+      description: this.generateCommentText(event),
+      eventType: event.kind
+    }));
+  }
+
+  private generateCommentText(event: Event): string {
+    switch (event.kind) {
+      case 'release':
+        return `Il treno ${event.tr} viene rilasciato dalla posizione ${this.formatLocationName(event.loc)}`;
+      
+      case 'move':
+        const fromFormatted = this.formatLocationName(event.from);
+        const toFormatted = this.formatLocationName(event.to);
+        
+        // Controlla se il treno sta arrivando alla destinazione finale
+        const finalDestination = this.trainFinalDestinations.get(event.tr);
+        const isArrivingAtFinalDestination = finalDestination === event.to && event.to.startsWith('stop-');
+        
+        if (isArrivingAtFinalDestination) {
+          return `🎯 Il treno ${event.tr} arriva alla destinazione finale: ${toFormatted}`;
+        }
+        
+        return `Il treno ${event.tr} si sposta da ${fromFormatted} a ${toFormatted}`;
+      
+      case 'track':
+        const action = event.status === 'open' ? 'apre' : 'chiude';
+        return `Il binario tra ${this.formatLocationName(event.a)} e ${this.formatLocationName(event.b)} si ${action}`;
+      
+      default:
+        return 'Azione sconosciuta';
+    }
+  }
+
+  private formatLocationName(location: string): string {
+    // Formatta i nomi delle posizioni per renderli più leggibili
+    if (location.startsWith('start-')) {
+      return `posizione di partenza ${location.replace('start-', '')}`;
+    }
+    if (location.startsWith('stop-')) {
+      return `Fermata ${location.replace('stop-', '')}`;
+    }
+    if (location.startsWith('switch-')) {
+      return `Scambio ${location.replace('switch-', '')}`;
+    }
+    if (location.startsWith('point-')) {
+      return `Punto ${location.replace('point-', '')}`;
+    }
+    return location;
   }
 
   // ───────────────────────────────────────── TRACK VISIBILITY ─────────────────────────────────
@@ -150,8 +312,8 @@ export class StationDetailComponent {
     const cached = this.trainImgs.get(tr);
     if (cached) return cached;
     const img = svgDoc.createElementNS('http://www.w3.org/2000/svg','image');
-    img.setAttributeNS('http://www.w3.org/1999/xlink','href','train_icon.png');
-    img.setAttribute('width','24'); img.setAttribute('height','24'); img.style.pointerEvents='none';
+    img.setAttributeNS('http://www.w3.org/1999/xlink','href','treno_rosso.png');
+    img.setAttribute('width','27'); img.setAttribute('height','27'); img.style.pointerEvents='none';
     svgDoc.querySelector('svg')!.appendChild(img);
     this.trainImgs.set(tr,img);
     return img;
@@ -165,6 +327,9 @@ export class StationDetailComponent {
     const nextIdx = (this.currentIdx+1)%this.events.length;
     const nextAt  = this.events[nextIdx].at>ev.at ? this.events[nextIdx].at : ev.at+1;
     const durMs   = (nextAt-ev.at)*1000*SPEED;
+
+    // Aggiorna il commento corrente
+    this.currentComment = this.animationComments[this.currentIdx];
 
     const svgDoc  = this.mapObject.nativeElement.contentDocument!;
     const svgRoot = svgDoc.querySelector('svg') as SVGSVGElement;
@@ -202,7 +367,12 @@ export class StationDetailComponent {
           const k=Math.min((now-t0)/durMs,1);
           img.setAttribute('x',String(p0.x+k*(p1.x-p0.x)-12));
           img.setAttribute('y',String(p0.y+k*(p1.y-p0.y)-12));
-          if(k<1) this.rafId=requestAnimationFrame(tick); else this.schedule(nextIdx,0);
+          if(k<1) this.rafId=requestAnimationFrame(tick); 
+          else {
+            // Quando il movimento è completato, controlla se il treno è arrivato a destinazione
+            this.checkTrainArrival(ev.tr, ev.to);
+            this.schedule(nextIdx,0);
+          }
         };
         this.rafId=requestAnimationFrame(tick);
         break; }
