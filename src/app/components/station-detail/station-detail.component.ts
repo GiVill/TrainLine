@@ -12,7 +12,7 @@ import { firstValueFrom } from 'rxjs';
 // Tipi evento estratti dal piano
 // ────────────────────────────────────────────────────
 interface ReleaseEv { kind: 'release'; at: number; tr: string; loc: string; }
-interface MoveEv    { kind: 'move';    at: number; tr: string; from: string; to: string; }
+interface MoveEv    { kind: 'move';    at: number; tr: string; from: string; to: string; duration: number; }
 interface TrackEv   { kind: 'track';   at: number; a: string;  b: string;  status: 'open' | 'closed'; }
 interface SwitchEv  { kind: 'switch';  at: number; switch: string; status: 'open' | 'closed'; }
 
@@ -52,7 +52,6 @@ interface ActiveAnimation {
   img: SVGImageElement;
 }
 
-const ANIMATION_SPEED = 100; // pixel per secondo (velocità costante)
 const ORIG = 'data-orig-status'; // attribute dove salviamo lo stato di partenza
 
 @Component({
@@ -276,10 +275,10 @@ export class StationDetailComponent {
         const isArrivingAtFinalDestination = finalDestination === event.to && event.to.startsWith('stop-');
 
         if (isArrivingAtFinalDestination) {
-          return `🎯 Il treno ${event.tr} arriva alla destinazione finale: ${toFormatted}`;
+          return `🎯 Il treno ${event.tr} arriva alla destinazione finale: ${toFormatted} (durata: ${event.duration}s)`;
         }
 
-        return `Il treno ${event.tr} si sposta da ${fromFormatted} a ${toFormatted}`;
+        return `Il treno ${event.tr} si sposta da ${fromFormatted} a ${toFormatted} (durata: ${event.duration}s)`;
 
       case 'track':
         const action = event.status === 'open' ? 'apre' : 'chiude';
@@ -351,17 +350,20 @@ export class StationDetailComponent {
   private parseEvents(txt: string): Event[] {
     const evs: Event[] = [];
 
-    // Parsing per eventi MOVE nel nuovo formato: MOVE-FROM-TO TRAIN
-    const move = /([\d.]+):\s*\(MOVE-([^-]+)-([^\s]+)\s+([^)]+)\)/gi;
+    // Parsing per eventi MOVE nel nuovo formato: MOVE-FROM-TO TRAIN [D:duration; C:cost]
+    const move = /([\d.]+):\s*\(MOVE-([^-]+)-([^\s]+)\s+([^)]+)\)\s*\[D:([\d.]+);[^\]]*\]/gi;
     for (const m of txt.matchAll(move)) {
       const from = this.normalizeLocationName(m[2]);
       const to = this.normalizeLocationName(m[3]);
+      const duration = parseFloat(m[5]);
+      
       evs.push({
         kind: 'move',
         at: +m[1],
         tr: m[4],
         from: from,
-        to: to
+        to: to,
+        duration: duration
       });
     }
 
@@ -377,10 +379,17 @@ export class StationDetailComponent {
       });
     }
 
-    // Manteniamo il parsing originale per retrocompatibilità
+    // Manteniamo il parsing originale per retrocompatibilità (senza durata)
     const moveOld = /([\d.]+)\s*:\s*\(move\s+([^\s]+)\s+([^\s]+)\s+([^\s)]+)\)/gi;
     for (const m of txt.matchAll(moveOld)) {
-      evs.push({ kind:'move', at:+m[1], tr:m[2], from:m[3], to:m[4] });
+      evs.push({ 
+        kind:'move', 
+        at:+m[1], 
+        tr:m[2], 
+        from:m[3], 
+        to:m[4],
+        duration: 1.0 // durata di default per compatibilità
+      });
     }
 
     const rel = /([\d.]+)\s*:\s*\(release\s+([^\s]+)\s+([^\s)]+)\)/gi;
@@ -493,8 +502,9 @@ export class StationDetailComponent {
 
     const startPos = this.center(svgRoot, from);
     const endPos = this.center(svgRoot, to);
-    const distance = this.calculateDistance(startPos, endPos);
-    const duration = distance / ANIMATION_SPEED; // durata basata sulla velocità costante
+    
+    // Usa la durata dal piano invece di calcolarla dalla distanza
+    const duration = event.duration;
 
     // Crea o aggiorna l'animazione attiva
     this.activeAnimations.set(event.tr, {
@@ -507,6 +517,8 @@ export class StationDetailComponent {
       endPos: endPos,
       img: img
     });
+
+    console.log(`Treno ${event.tr}: movimento da ${event.from} a ${event.to} - durata: ${duration}s`);
   }
 
   private handleTrackEvent(event: TrackEv, svgDoc: Document) {
