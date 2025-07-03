@@ -49,12 +49,12 @@
     <div class="station-content">
       <div class="diagram-section" style="grid-column: 1 / -1;">
         <h3>Station Map</h3>
-        
+
         <!-- Controlli animazione - solo per la stazione di Cagliari -->
         <div class="animation-controls" *ngIf="station.stop_name === 'Stazione di CAGLIARI'">
-          <button 
-            class="control-btn start-btn" 
-            (click)="startAnimation()" 
+          <button
+            class="control-btn start-btn"
+            (click)="startAnimation()"
             [disabled]="isAnimating"
             [class.disabled]="isAnimating"
             [title]="isAnimating ? 'Animazione in corso' : 'Avvia o riprendi simulazione'"
@@ -64,10 +64,10 @@
             </svg>
             {{ currentIdx === 0 ? 'Avvia simulazione' : 'Riprendi simulazione' }}
           </button>
-          
-          <button 
-            class="control-btn stop-btn" 
-            (click)="stopAnimation()" 
+
+          <button
+            class="control-btn stop-btn"
+            (click)="stopAnimation()"
             [disabled]="!isAnimating"
             [class.disabled]="!isAnimating"
             title="Metti in pausa la simulazione"
@@ -79,9 +79,9 @@
             Pausa
           </button>
 
-          <button 
-            class="control-btn reset-btn" 
-            (click)="resetAnimation()" 
+          <button
+            class="control-btn reset-btn"
+            (click)="resetAnimation()"
             [disabled]="isAnimating"
             [class.disabled]="isAnimating"
             title="Riporta la simulazione all'inizio"
@@ -116,13 +116,13 @@
         <!-- Sezione commenti animazione - solo per la stazione di Cagliari -->
         <div class="animation-comments-section" *ngIf="station.stop_name === 'Stazione di CAGLIARI'">
           <h4>Descrizione dell'animazione</h4>
-          
+
           <!-- Commento corrente in evidenza -->
           <div class="current-step" *ngIf="currentComment">
             <div class="step-header">
               <span class="step-number">Passo {{ currentComment.stepNumber }}</span>
               <span class="step-type" [class]="'type-' + currentComment.eventType">
-                {{ currentComment.eventType === 'move' ? 'Movimento' : 
+                {{ currentComment.eventType === 'move' ? 'Movimento' :
                    currentComment.eventType === 'release' ? 'Rilascio' : 'Binario' }}
               </span>
             </div>
@@ -135,8 +135,8 @@
           <div class="train-destinations-section" *ngIf="trainDestinations.length > 0">
             <h5>Destinazioni dei treni</h5>
             <div class="destinations-grid">
-              <div 
-                class="destination-item" 
+              <div
+                class="destination-item"
                 *ngFor="let destination of trainDestinations"
                 [class.destination-arrived]="destination.isArrived"
                 [class.destination-arriving]="destination.isAnimating"
@@ -144,32 +144,32 @@
                 <div class="train-id">{{ destination.trainId }}</div>
                 <div class="destination-arrow">→</div>
                 <div class="destination-name">{{ destination.destination }}</div>
-                
+
                 <!-- Indicatore di arrivo -->
                 <div class="arrival-indicator" *ngIf="destination.isArrived || destination.isAnimating">
-                  <svg 
-                    *ngIf="destination.isArrived" 
-                    class="arrival-icon arrived" 
-                    width="20" 
-                    height="20" 
-                    viewBox="0 0 24 24" 
-                    fill="none" 
-                    stroke="currentColor" 
+                  <svg
+                    *ngIf="destination.isArrived"
+                    class="arrival-icon arrived"
+                    width="20"
+                    height="20"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
                     stroke-width="2"
                   >
                     <polyline points="20,6 9,17 4,12"></polyline>
                   </svg>
-                  
-                  <div 
-                    *ngIf="destination.isAnimating" 
+
+                  <div
+                    *ngIf="destination.isAnimating"
                     class="arrival-icon arriving"
                   >
-                    <svg 
-                      width="20" 
-                      height="20" 
-                      viewBox="0 0 24 24" 
-                      fill="none" 
-                      stroke="currentColor" 
+                    <svg
+                      width="20"
+                      height="20"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
                       stroke-width="2"
                     >
                       <circle cx="12" cy="12" r="3"></circle>
@@ -187,10 +187,10 @@
               <h5>Tutti i passi della simulazione</h5>
               <span class="steps-count">{{ animationComments.length }} passi totali</span>
             </div>
-            
+
             <div class="steps-container">
-              <div 
-                class="step-item" 
+              <div
+                class="step-item"
                 *ngFor="let comment of animationComments; let i = index"
                 [class.active]="i === currentIdx"
                 [class.completed]="i < currentIdx"
@@ -201,7 +201,7 @@
                 <div class="step-content">
                   <div class="step-meta">
                     <span class="step-type-badge" [class]="'badge-' + comment.eventType">
-                      {{ comment.eventType === 'move' ? 'MOV' : 
+                      {{ comment.eventType === 'move' ? 'MOV' :
                          comment.eventType === 'release' ? 'REL' : 'TRK' }}
                     </span>
                   </div>

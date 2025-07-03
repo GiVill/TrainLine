@@ -48,48 +48,31 @@ h1 setup time (msec): 26
 problem solved
 
 found plan:
-0.0: (move t1 start-1 switch-1)
-1.0: (move t2 start-2 switch-8)
-2.0: (move t2 switch-8 switch-9)
-3.0: (move t2 switch-9 switch-10)
-4.0: (move t2 switch-10 switch-11)
-5.0: (move t2 switch-11 switch-12)
-6.0: (move t2 switch-12 switch-13)
-7.0: (move t1 switch-1 switch-2)
-8.0: (move t1 switch-2 switch-3)
-9.0: (move t2 switch-13 stop-8)
-10.0: (move t1 switch-3 switch-4)
-11.0: (move t1 switch-4 switch-5)
-12.0: (move t1 switch-5 switch-6)
-13.0: (close-track point-5 switch-19)
-14.0: (close-track switch-13 stop-8)
-15.0: (move t1 switch-6 switch-21)
-16.0: (move t1 switch-21 switch-22)
-17.0: (move t1 switch-22 stop-5)
-18.0: (release t3 start-1)
-19.0: (move t3 start-1 switch-1)
-20.0: (move t3 switch-1 switch-2)
-21.0: (move t3 switch-2 switch-3)
-22.0: (move t3 switch-3 switch-4)
-23.0: (move t3 switch-4 switch-5)
-24.0: (move t3 switch-5 switch-6)
-25.0: (move t3 switch-6 switch-21)
-26.0: (move t3 switch-21 point-7)
-27.0: (move t3 point-7 switch-25)
-28.0: (move t3 switch-25 switch-26)
-29.0: (move t3 switch-26 switch-27)
-30.0: (move t3 switch-27 stop-2)
-31.0: (release t4 start-2)
-32.0: (move t4 start-2 switch-8)
-33.0: (move t4 switch-8 switch-9)
-34.0: (move t4 switch-9 switch-3)
-35.0: (move t4 switch-3 switch-4)
-36.0: (move t4 switch-4 switch-5)
-37.0: (move t4 switch-5 switch-20)
-38.0: (move t4 switch-20 switch-21)
-39.0: (move t4 switch-21 switch-22)
-40.0: (move t4 switch-22 switch-23)
-41.0: (move t4 switch-23 stop-4)
+0.0000: (OPEN-SWITCH SWITCH-25) [D:2.00; C:0.10]
+0.0000: (OPEN-SWITCH SWITCH-28) [D:2.00; C:0.10]
+0.0000: (MOVE-START1-SWITCH1 T1) [D:63.94; C:0.10]
+0.0000: (ENABLE-DEPARTURE-T2) [D:600.00; C:0.10]
+0.0000: (OPEN-SWITCH SWITCH-21) [D:2.00; C:0.10]
+61.9400: (OPEN-SWITCH SWITCH-1) [D:2.00; C:0.10]
+63.9400: (MOVE-SWITCH1-SWITCH3 T1) [D:13.20; C:0.10]
+77.1400: (MOVE-SWITCH3-SWITCH6 T1) [D:247.10; C:0.10]
+598.0000: (OPEN-SWITCH SWITCH-8) [D:2.00; C:0.10]
+600.0000: (MOVE-START2-SWITCH8 T2) [D:57.10; C:0.10]
+655.1000: (CLOSE-SWITCH SWITCH-1) [D:2.00; C:0.10]
+657.1000: (MOVE-SWITCH8-SWITCH1 T2) [D:10.60; C:0.10]
+667.7000: (MOVE-SWITCH1-SWITCH3 T2) [D:13.20; C:0.10]
+678.9000: (OPEN-SWITCH SWITCH-6) [D:2.00; C:0.10]
+680.9000: (MOVE-SWITCH3-SWITCH6 T2) [D:247.10; C:0.10]
+680.9000: (MOVE-SWITCH6-SWITCH21 T1) [D:10.60; C:0.10]
+691.5000: (MOVE-SWITCH21-POINT7 T1) [D:21.82; C:0.10]
+713.3200: (MOVE-POINT7-SWITCH25 T1) [D:4.50; C:0.10]
+715.8200: (CLOSE-SWITCH SWITCH-25) [D:2.00; C:0.10]
+717.8200: (MOVE-SWITCH25-SWITCH28 T1) [D:21.82; C:0.10]
+739.6400: (MOVE-SWITCH28-STOP1 T1) [D:62.40; C:0.10]
+928.0000: (MOVE-SWITCH6-SWITCH21 T2) [D:10.60; C:0.10]
+938.6000: (MOVE-SWITCH21-POINT7 T2) [D:21.82; C:0.10]
+960.4200: (MOVE-POINT7-SWITCH25 T2) [D:4.50; C:0.10]
+964.9200: (MOVE-SWITCH25-STOP3 T2) [D:65.20; C:0.10]
 
 plan-length:42
 metric (search):161.0

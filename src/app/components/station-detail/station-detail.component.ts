@@ -14,8 +14,9 @@ import { firstValueFrom } from 'rxjs';
 interface ReleaseEv { kind: 'release'; at: number; tr: string; loc: string; }
 interface MoveEv    { kind: 'move';    at: number; tr: string; from: string; to: string; }
 interface TrackEv   { kind: 'track';   at: number; a: string;  b: string;  status: 'open' | 'closed'; }
+interface SwitchEv  { kind: 'switch';  at: number; switch: string; status: 'open' | 'closed'; }
 
-type Event = ReleaseEv | MoveEv | TrackEv;
+type Event = ReleaseEv | MoveEv | TrackEv | SwitchEv;
 
 // ────────────────────────────────────────────────────
 // Interfaccia per i commenti dell'animazione
@@ -24,7 +25,7 @@ interface AnimationComment {
   stepNumber: number;
   time: number;
   description: string;
-  eventType: 'release' | 'move' | 'track';
+  eventType: 'release' | 'move' | 'track' | 'switch';
 }
 
 // ────────────────────────────────────────────────────
@@ -127,34 +128,38 @@ export class StationDetailComponent {
   // ───────────────────────────────────────── ESTRAZIONE DESTINAZIONI ─────────────────────────────
   private extractTrainDestinations(planText: string) {
     const destinations = new Map<string, string>();
-    
+
     // Estrae tutti gli eventi di movimento dal piano
     const moveEvents: { time: number, train: string, from: string, to: string }[] = [];
-    
-    const moveRegex = /([\d.]+)\s*:\s*\(move\s+([^\s]+)\s+([^\s]+)\s+([^\s)]+)\)/gi;
-    
+
+    // Nuovo regex per il formato aggiornato: MOVE-FROM-TO TRAIN
+    const moveRegex = /([\d.]+):\s*\(MOVE-([^-]+)-([^\s]+)\s+([^)]+)\)/gi;
+
     for (const match of planText.matchAll(moveRegex)) {
+      const from = this.normalizeLocationName(match[2]);
+      const to = this.normalizeLocationName(match[3]);
+
       moveEvents.push({
         time: parseFloat(match[1]),
-        train: match[2],
-        from: match[3],
-        to: match[4]
+        train: match[4],
+        from: from,
+        to: to
       });
     }
-    
+
     // Ordina gli eventi per tempo
     moveEvents.sort((a, b) => a.time - b.time);
-    
+
     // Per ogni treno, trova l'ultima destinazione
     const trainLastDestination = new Map<string, string>();
-    
+
     moveEvents.forEach(event => {
       trainLastDestination.set(event.train, event.to);
     });
 
     // Salva le destinazioni finali per uso interno
     this.trainFinalDestinations = new Map(trainLastDestination);
-    
+
     // Converte la mappa in array di oggetti, filtrando solo le destinazioni che sono "stop-"
     this.trainDestinations = Array.from(trainLastDestination.entries())
       .filter(([trainId, destination]) => destination.startsWith('stop-'))
@@ -164,25 +169,46 @@ export class StationDetailComponent {
         isArrived: false,
         isAnimating: false
       }));
-    
+
     console.log('Destinazioni treni estratte:', this.trainDestinations);
+  }
+
+  // ───────────────────────────────────────── NORMALIZZAZIONE NOMI POSIZIONI ─────────────────────
+  private normalizeLocationName(name: string): string {
+    // Converte i nomi dal nuovo formato al formato originale
+    name = name.toLowerCase();
+
+    if (name.startsWith('start')) {
+      return `start-${name.replace('start', '')}`;
+    }
+    if (name.startsWith('stop')) {
+      return `stop-${name.replace('stop', '')}`;
+    }
+    if (name.startsWith('switch')) {
+      return `switch-${name.replace('switch', '')}`;
+    }
+    if (name.startsWith('point')) {
+      return `point-${name.replace('point', '')}`;
+    }
+
+    return name;
   }
 
   // ───────────────────────────────────────── CONTROLLO ARRIVO A DESTINAZIONE ─────────────────────
   private checkTrainArrival(trainId: string, currentLocation: string) {
     const finalDestination = this.trainFinalDestinations.get(trainId);
-    
+
     if (finalDestination && currentLocation === finalDestination) {
       // Il treno ha raggiunto la destinazione finale
       const destinationItem = this.trainDestinations.find(dest => dest.trainId === trainId);
-      
+
       if (destinationItem && !destinationItem.isArrived) {
         console.log(`Treno ${trainId} è arrivato alla destinazione finale: ${finalDestination}`);
-        
+
         // Avvia l'animazione di arrivo
         destinationItem.isAnimating = true;
         destinationItem.isArrived = false;
-        
+
         // Dopo un breve delay, completa l'animazione
         setTimeout(() => {
           if (destinationItem) {
@@ -208,25 +234,29 @@ export class StationDetailComponent {
     switch (event.kind) {
       case 'release':
         return `Il treno ${event.tr} viene rilasciato dalla posizione ${this.formatLocationName(event.loc)}`;
-      
+
       case 'move':
         const fromFormatted = this.formatLocationName(event.from);
         const toFormatted = this.formatLocationName(event.to);
-        
+
         // Controlla se il treno sta arrivando alla destinazione finale
         const finalDestination = this.trainFinalDestinations.get(event.tr);
         const isArrivingAtFinalDestination = finalDestination === event.to && event.to.startsWith('stop-');
-        
+
         if (isArrivingAtFinalDestination) {
           return `🎯 Il treno ${event.tr} arriva alla destinazione finale: ${toFormatted}`;
         }
-        
+
         return `Il treno ${event.tr} si sposta da ${fromFormatted} a ${toFormatted}`;
-      
+
       case 'track':
         const action = event.status === 'open' ? 'apre' : 'chiude';
         return `Il binario tra ${this.formatLocationName(event.a)} e ${this.formatLocationName(event.b)} si ${action}`;
-      
+
+      case 'switch':
+        const switchAction = event.status === 'open' ? 'apre' : 'chiude';
+        return `Lo scambio ${this.formatLocationName(event.switch)} si ${switchAction}`;
+
       default:
         return 'Azione sconosciuta';
     }
@@ -289,14 +319,47 @@ export class StationDetailComponent {
   private parseEvents(txt: string): Event[] {
     const evs: Event[] = [];
 
-    const move = /([\d.]+)\s*:\s*\(move\s+([^\s]+)\s+([^\s]+)\s+([^\s)]+)\)/gi;
-    for (const m of txt.matchAll(move))   evs.push({ kind:'move',    at:+m[1], tr:m[2], from:m[3], to:m[4] });
+    // Parsing per eventi MOVE nel nuovo formato: MOVE-FROM-TO TRAIN
+    const move = /([\d.]+):\s*\(MOVE-([^-]+)-([^\s]+)\s+([^)]+)\)/gi;
+    for (const m of txt.matchAll(move)) {
+      const from = this.normalizeLocationName(m[2]);
+      const to = this.normalizeLocationName(m[3]);
+      evs.push({
+        kind: 'move',
+        at: +m[1],
+        tr: m[4],
+        from: from,
+        to: to
+      });
+    }
 
-    const rel  = /([\d.]+)\s*:\s*\(release\s+([^\s]+)\s+([^\s)]+)\)/gi;
-    for (const m of txt.matchAll(rel))    evs.push({ kind:'release', at:+m[1], tr:m[2], loc:m[3] });
+    // Parsing per eventi OPEN-SWITCH e CLOSE-SWITCH
+    const switchOp = /([\d.]+):\s*\((OPEN|CLOSE)-SWITCH\s+([^)]+)\)/gi;
+    for (const m of txt.matchAll(switchOp)) {
+      const switchName = this.normalizeLocationName(m[3]);
+      evs.push({
+        kind: 'switch',
+        at: +m[1],
+        switch: switchName,
+        status: m[2].toLowerCase() === 'open' ? 'open' : 'closed'
+      });
+    }
 
-    const trk  = /([\d.]+)\s*:\s*\((open|close)-track\s+([^\s]+)\s+([^\s)]+)\)/gi;
-    for (const m of txt.matchAll(trk))    evs.push({ kind:'track',   at:+m[1], a:m[3], b:m[4], status:m[2]==='open'?'open':'closed' });
+    // Manteniamo il parsing originale per retrocompatibilità
+    const moveOld = /([\d.]+)\s*:\s*\(move\s+([^\s]+)\s+([^\s]+)\s+([^\s)]+)\)/gi;
+    for (const m of txt.matchAll(moveOld)) {
+      evs.push({ kind:'move', at:+m[1], tr:m[2], from:m[3], to:m[4] });
+    }
+
+    const rel = /([\d.]+)\s*:\s*\(release\s+([^\s]+)\s+([^\s)]+)\)/gi;
+    for (const m of txt.matchAll(rel)) {
+      evs.push({ kind:'release', at:+m[1], tr:m[2], loc:m[3] });
+    }
+
+    const trk = /([\d.]+)\s*:\s*\((open|close)-track\s+([^\s]+)\s+([^\s)]+)\)/gi;
+    for (const m of txt.matchAll(trk)) {
+      evs.push({ kind:'track', at:+m[1], a:m[3], b:m[4], status:m[2]==='open'?'open':'closed' });
+    }
 
     return evs.sort((a,b)=>a.at-b.at);
   }
@@ -342,6 +405,28 @@ export class StationDetailComponent {
         if (loc){ const p=this.center(svgRoot,loc); img.setAttribute('x',String(p.x-12)); img.setAttribute('y',String(p.y-12)); }
         this.schedule(nextIdx,0); break; }
 
+      /* ---- switch open/close ------------------------------------- */
+      case 'switch': {
+        // Gestisce l'apertura/chiusura di uno switch specifico
+        const switchEl = svgDoc.getElementById(ev.switch) as SVGGraphicsElement|null;
+        if (switchEl) {
+          switchEl.style.transition = 'opacity 300ms linear';
+          switchEl.setAttribute('data-status', ev.status);
+          switchEl.style.opacity = ev.status === 'open' ? '1' : '0.3';
+        }
+
+        // Trova anche eventuali linee collegate a questo switch
+        const lines = svgDoc.querySelectorAll<SVGGraphicsElement>(`line[data-path*="${ev.switch}"]`);
+        lines.forEach(line => {
+          line.style.transition = 'opacity 300ms linear';
+          line.setAttribute('data-status', ev.status);
+          line.style.opacity = ev.status === 'open' ? '1' : '0';
+        });
+
+        this.schedule(nextIdx, 0);
+        break;
+      }
+
       /* ---- track open/close -------------------------------------- */
       case 'track': {
         [`${ev.a},${ev.b}`,`${ev.b},${ev.a}`].forEach(path=>{
@@ -367,7 +452,7 @@ export class StationDetailComponent {
           const k=Math.min((now-t0)/durMs,1);
           img.setAttribute('x',String(p0.x+k*(p1.x-p0.x)-12));
           img.setAttribute('y',String(p0.y+k*(p1.y-p0.y)-12));
-          if(k<1) this.rafId=requestAnimationFrame(tick); 
+          if(k<1) this.rafId=requestAnimationFrame(tick);
           else {
             // Quando il movimento è completato, controlla se il treno è arrivato a destinazione
             this.checkTrainArrival(ev.tr, ev.to);
