@@ -38,8 +38,22 @@ interface TrainDestination {
   isAnimating?: boolean;
 }
 
-const SPEED = 2;                     // fattore di rallentamento/velocità
-const ORIG  = 'data-orig-status';    // attribute dove salviamo lo stato di partenza
+// ────────────────────────────────────────────────────
+// Interfaccia per le animazioni attive
+// ────────────────────────────────────────────────────
+interface ActiveAnimation {
+  trainId: string;
+  startTime: number;
+  endTime: number;
+  fromElement: SVGGraphicsElement;
+  toElement: SVGGraphicsElement;
+  startPos: { x: number; y: number };
+  endPos: { x: number; y: number };
+  img: SVGImageElement;
+}
+
+const ANIMATION_SPEED = 100; // pixel per secondo (velocità costante)
+const ORIG = 'data-orig-status'; // attribute dove salviamo lo stato di partenza
 
 @Component({
   selector: 'app-station-detail',
@@ -68,8 +82,11 @@ export class StationDetailComponent {
   isAnimating = false;
   private rafId: number | null = null;
   private timeoutId: any = null;
+  private animationStartTime: number = 0;
+  private currentAnimationTime: number = 0;
 
   private trainImgs = new Map<string, SVGImageElement>();
+  private activeAnimations = new Map<string, ActiveAnimation>();
 
   // ────────── commenti animazione ──────────
   animationComments: AnimationComment[] = [];
@@ -102,13 +119,27 @@ export class StationDetailComponent {
   }
 
   // ───────────────────────────────────────── CONTROLLI UI ─────────────────────────────────────
-  startAnimation() { if (this.ready && !this.isAnimating) { this.isAnimating = true; this.step(); } }
-  stopAnimation()  { this.isAnimating = false; if (this.rafId) cancelAnimationFrame(this.rafId); if (this.timeoutId) clearTimeout(this.timeoutId); }
+  startAnimation() { 
+    if (this.ready && !this.isAnimating) { 
+      this.isAnimating = true; 
+      this.animationStartTime = performance.now();
+      this.currentAnimationTime = 0;
+      this.animationLoop(); 
+    } 
+  }
+
+  stopAnimation() { 
+    this.isAnimating = false; 
+    if (this.rafId) cancelAnimationFrame(this.rafId); 
+    if (this.timeoutId) clearTimeout(this.timeoutId); 
+    this.activeAnimations.clear();
+  }
 
   resetAnimation() {
     this.stopAnimation();
     this.currentIdx = 0;
     this.currentComment = null;
+    this.currentAnimationTime = 0;
 
     // Reset stato destinazioni
     this.trainDestinations.forEach(dest => {
@@ -119,6 +150,7 @@ export class StationDetailComponent {
     // rimuove eventuali trenini
     this.trainImgs.forEach(img => img.remove());
     this.trainImgs.clear();
+    this.activeAnimations.clear();
 
     // ripristina lo stato originale dei binari e aggiorna visibilità
     this.restoreOriginalTrackStatus();
@@ -382,91 +414,165 @@ export class StationDetailComponent {
     return img;
   }
 
-  // ───────────────────────────────────────── TIMELINE ─────────────────────────────────────────
-  private step() {
+  private calculateDistance(p1: {x: number, y: number}, p2: {x: number, y: number}): number {
+    const dx = p2.x - p1.x;
+    const dy = p2.y - p1.y;
+    return Math.sqrt(dx * dx + dy * dy);
+  }
+
+  // ───────────────────────────────────────── ANIMAZIONE LOOP ─────────────────────────────────
+  private animationLoop() {
     if (!this.isAnimating) return;
 
-    const ev      = this.events[this.currentIdx];
-    const nextIdx = (this.currentIdx+1)%this.events.length;
-    const nextAt  = this.events[nextIdx].at>ev.at ? this.events[nextIdx].at : ev.at+1;
-    const durMs   = (nextAt-ev.at)*1000*SPEED;
+    const now = performance.now();
+    this.currentAnimationTime = (now - this.animationStartTime) / 1000; // tempo in secondi
 
-    // Aggiorna il commento corrente
-    this.currentComment = this.animationComments[this.currentIdx];
+    // Processa tutti gli eventi che dovrebbero essere attivi in questo momento
+    this.processEvents();
+    
+    // Aggiorna tutte le animazioni attive
+    this.updateActiveAnimations();
 
-    const svgDoc  = this.mapObject.nativeElement.contentDocument!;
+    // Continua il loop
+    this.rafId = requestAnimationFrame(() => this.animationLoop());
+  }
+
+  private processEvents() {
+    const svgDoc = this.mapObject.nativeElement.contentDocument!;
     const svgRoot = svgDoc.querySelector('svg') as SVGSVGElement;
 
-    switch(ev.kind){
-      /* ---- release ------------------------------------------------ */
-      case 'release': {
-        const img = this.getTrain(svgDoc,ev.tr);
-        const loc = svgDoc.getElementById(ev.loc) as SVGGraphicsElement|null;
-        if (loc){ const p=this.center(svgRoot,loc); img.setAttribute('x',String(p.x-12)); img.setAttribute('y',String(p.y-12)); }
-        this.schedule(nextIdx,0); break; }
-
-      /* ---- switch open/close ------------------------------------- */
-      case 'switch': {
-        // Gestisce l'apertura/chiusura di uno switch specifico
-        const switchEl = svgDoc.getElementById(ev.switch) as SVGGraphicsElement|null;
-        if (switchEl) {
-          switchEl.style.transition = 'opacity 300ms linear';
-          switchEl.setAttribute('data-status', ev.status);
-          switchEl.style.opacity = ev.status === 'open' ? '1' : '0.3';
-        }
-
-        // Trova anche eventuali linee collegate a questo switch
-        const lines = svgDoc.querySelectorAll<SVGGraphicsElement>(`line[data-path*="${ev.switch}"]`);
-        lines.forEach(line => {
-          line.style.transition = 'opacity 300ms linear';
-          line.setAttribute('data-status', ev.status);
-          line.style.opacity = ev.status === 'open' ? '1' : '0';
-        });
-
-        this.schedule(nextIdx, 0);
-        break;
+    // Processa tutti gli eventi che dovrebbero iniziare ora
+    while (this.currentIdx < this.events.length) {
+      const event = this.events[this.currentIdx];
+      
+      if (event.at > this.currentAnimationTime) {
+        break; // Eventi futuri, aspetta
       }
 
-      /* ---- track open/close -------------------------------------- */
-      case 'track': {
-        [`${ev.a},${ev.b}`,`${ev.b},${ev.a}`].forEach(path=>{
-          const line = svgDoc.querySelector<SVGGraphicsElement>(`line[data-path="${path}"]`);
-          if (line){
-            line.style.transition='opacity 300ms linear';
-            line.setAttribute('data-status',ev.status);
-            line.style.opacity = ev.status==='open'?'1':'0';
-          }
-        });
-        this.schedule(nextIdx,0); break; }
+      // Aggiorna il commento corrente
+      this.currentComment = this.animationComments[this.currentIdx];
 
-      /* ---- move --------------------------------------------------- */
-      case 'move': {
-        const img = this.getTrain(svgDoc,ev.tr);
-        const from = svgDoc.getElementById(ev.from) as SVGGraphicsElement|null;
-        const to   = svgDoc.getElementById(ev.to)   as SVGGraphicsElement|null;
-        if (!(from&&to)){ this.schedule(nextIdx,0); break; }
-        const p0=this.center(svgRoot,from); const p1=this.center(svgRoot,to);
-        const t0=performance.now();
-        const tick=(now:number)=>{
-          if(!this.isAnimating) return;
-          const k=Math.min((now-t0)/durMs,1);
-          img.setAttribute('x',String(p0.x+k*(p1.x-p0.x)-12));
-          img.setAttribute('y',String(p0.y+k*(p1.y-p0.y)-12));
-          if(k<1) this.rafId=requestAnimationFrame(tick);
-          else {
-            // Quando il movimento è completato, controlla se il treno è arrivato a destinazione
-            this.checkTrainArrival(ev.tr, ev.to);
-            this.schedule(nextIdx,0);
-          }
-        };
-        this.rafId=requestAnimationFrame(tick);
-        break; }
+      switch (event.kind) {
+        case 'release':
+          this.handleReleaseEvent(event, svgDoc, svgRoot);
+          break;
+
+        case 'move':
+          this.handleMoveEvent(event, svgDoc, svgRoot);
+          break;
+
+        case 'track':
+          this.handleTrackEvent(event, svgDoc);
+          break;
+
+        case 'switch':
+          this.handleSwitchEvent(event, svgDoc);
+          break;
+      }
+
+      this.currentIdx++;
     }
   }
 
-  private schedule(idx:number,delayMs:number){
-    this.currentIdx=idx;
-    if(!this.isAnimating) return;
-    this.timeoutId=setTimeout(()=>this.step(),delayMs);
+  private handleReleaseEvent(event: ReleaseEv, svgDoc: Document, svgRoot: SVGSVGElement) {
+    const img = this.getTrain(svgDoc, event.tr);
+    const loc = svgDoc.getElementById(event.loc) as SVGGraphicsElement | null;
+    if (loc) {
+      const p = this.center(svgRoot, loc);
+      img.setAttribute('x', String(p.x - 12));
+      img.setAttribute('y', String(p.y - 12));
+    }
+  }
+
+  private handleMoveEvent(event: MoveEv, svgDoc: Document, svgRoot: SVGSVGElement) {
+    const img = this.getTrain(svgDoc, event.tr);
+    const from = svgDoc.getElementById(event.from) as SVGGraphicsElement | null;
+    const to = svgDoc.getElementById(event.to) as SVGGraphicsElement | null;
+    
+    if (!(from && to)) return;
+
+    const startPos = this.center(svgRoot, from);
+    const endPos = this.center(svgRoot, to);
+    const distance = this.calculateDistance(startPos, endPos);
+    const duration = distance / ANIMATION_SPEED; // durata basata sulla velocità costante
+
+    // Crea o aggiorna l'animazione attiva
+    this.activeAnimations.set(event.tr, {
+      trainId: event.tr,
+      startTime: this.currentAnimationTime,
+      endTime: this.currentAnimationTime + duration,
+      fromElement: from,
+      toElement: to,
+      startPos: startPos,
+      endPos: endPos,
+      img: img
+    });
+  }
+
+  private handleTrackEvent(event: TrackEv, svgDoc: Document) {
+    [`${event.a},${event.b}`, `${event.b},${event.a}`].forEach(path => {
+      const line = svgDoc.querySelector<SVGGraphicsElement>(`line[data-path="${path}"]`);
+      if (line) {
+        line.style.transition = 'opacity 300ms linear';
+        line.setAttribute('data-status', event.status);
+        line.style.opacity = event.status === 'open' ? '1' : '0';
+      }
+    });
+  }
+
+  private handleSwitchEvent(event: SwitchEv, svgDoc: Document) {
+    const switchEl = svgDoc.getElementById(event.switch) as SVGGraphicsElement | null;
+    if (switchEl) {
+      switchEl.style.transition = 'opacity 300ms linear';
+      switchEl.setAttribute('data-status', event.status);
+      switchEl.style.opacity = event.status === 'open' ? '1' : '0.3';
+    }
+
+    // Trova anche eventuali linee collegate a questo switch
+    const lines = svgDoc.querySelectorAll<SVGGraphicsElement>(`line[data-path*="${event.switch}"]`);
+    lines.forEach(line => {
+      line.style.transition = 'opacity 300ms linear';
+      line.setAttribute('data-status', event.status);
+      line.style.opacity = event.status === 'open' ? '1' : '0';
+    });
+  }
+
+  private updateActiveAnimations() {
+    const completedAnimations: string[] = [];
+
+    this.activeAnimations.forEach((animation, trainId) => {
+      const progress = Math.min((this.currentAnimationTime - animation.startTime) / (animation.endTime - animation.startTime), 1);
+      
+      if (progress >= 1) {
+        // Animazione completata
+        animation.img.setAttribute('x', String(animation.endPos.x - 12));
+        animation.img.setAttribute('y', String(animation.endPos.y - 12));
+        
+        // Controlla se il treno è arrivato a destinazione
+        const moveEvent = this.events.find(e => 
+          e.kind === 'move' && 
+          e.tr === trainId && 
+          e.at <= this.currentAnimationTime
+        ) as MoveEv;
+        
+        if (moveEvent) {
+          this.checkTrainArrival(trainId, moveEvent.to);
+        }
+        
+        completedAnimations.push(trainId);
+      } else {
+        // Aggiorna posizione interpolata
+        const currentX = animation.startPos.x + (animation.endPos.x - animation.startPos.x) * progress;
+        const currentY = animation.startPos.y + (animation.endPos.y - animation.startPos.y) * progress;
+        
+        animation.img.setAttribute('x', String(currentX - 12));
+        animation.img.setAttribute('y', String(currentY - 12));
+      }
+    });
+
+    // Rimuovi animazioni completate
+    completedAnimations.forEach(trainId => {
+      this.activeAnimations.delete(trainId);
+    });
   }
 }
