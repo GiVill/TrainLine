@@ -146,6 +146,9 @@ export class StationDetailComponent {
       dest.isAnimating = false;
     });
 
+    // Reset posizioni treni
+    this.trainCurrentPositions.clear();
+
     // rimuove eventuali trenini
     this.trainImgs.forEach(img => img.remove());
     this.trainImgs.clear();
@@ -225,21 +228,24 @@ export class StationDetailComponent {
     return name;
   }
 
+  // ───────────────────────────────────────── NUOVA PROPRIETÀ DELLA CLASSE ─────────────────────
+  private trainCurrentPositions = new Map<string, string>();
+
   // ───────────────────────────────────────── CONTROLLO ARRIVO A DESTINAZIONE ─────────────────────
   private checkTrainArrival(trainId: string, currentLocation: string) {
     const finalDestination = this.trainFinalDestinations.get(trainId);
-
+    
     if (finalDestination && currentLocation === finalDestination) {
       // Il treno ha raggiunto la destinazione finale
       const destinationItem = this.trainDestinations.find(dest => dest.trainId === trainId);
-
+      
       if (destinationItem && !destinationItem.isArrived) {
         console.log(`Treno ${trainId} è arrivato alla destinazione finale: ${finalDestination}`);
-
+        
         // Avvia l'animazione di arrivo
         destinationItem.isAnimating = true;
         destinationItem.isArrived = false;
-
+        
         // Dopo un breve delay, completa l'animazione
         setTimeout(() => {
           if (destinationItem) {
@@ -259,6 +265,14 @@ export class StationDetailComponent {
       description: this.generateCommentText(event),
       eventType: event.kind
     }));
+  }
+
+  private debugTrainPositions() {
+    console.log('=== STATO TRENI ===');
+    console.log('Posizioni attuali:', this.trainCurrentPositions);
+    console.log('Destinazioni finali:', this.trainFinalDestinations);
+    console.log('Stato destinazioni:', this.trainDestinations);
+    console.log('================');
   }
 
   private generateCommentText(event: Event): string {
@@ -446,6 +460,18 @@ export class StationDetailComponent {
     this.rafId = requestAnimationFrame(() => this.animationLoop());
   }
 
+  // ───────────────────────────────────────── AGGIORNAMENTO POSIZIONI TRENI ─────────────────────
+
+  private updateTrainPosition(trainId: string, newLocation: string) {
+    const oldLocation = this.trainCurrentPositions.get(trainId);
+    this.trainCurrentPositions.set(trainId, newLocation);
+    
+    // Controlla se il treno è arrivato a destinazione
+    this.checkTrainArrival(trainId, newLocation);
+    
+    console.log(`Treno ${trainId}: posizione aggiornata da ${oldLocation || 'sconosciuta'} a ${newLocation}`);
+  }
+
   private processEvents() {
     const svgDoc = this.mapObject.nativeElement.contentDocument!;
     const svgRoot = svgDoc.querySelector('svg') as SVGSVGElement;
@@ -490,6 +516,9 @@ export class StationDetailComponent {
       const p = this.center(svgRoot, loc);
       img.setAttribute('x', String(p.x - 12));
       img.setAttribute('y', String(p.y - 12));
+      
+      // Aggiorna la posizione del treno
+      this.updateTrainPosition(event.tr, event.loc);
     }
   }
 
@@ -560,15 +589,16 @@ export class StationDetailComponent {
         animation.img.setAttribute('x', String(animation.endPos.x - 12));
         animation.img.setAttribute('y', String(animation.endPos.y - 12));
         
-        // Controlla se il treno è arrivato a destinazione
+        // Trova l'evento di movimento corrispondente per ottenere la destinazione
         const moveEvent = this.events.find(e => 
           e.kind === 'move' && 
           e.tr === trainId && 
-          e.at <= this.currentAnimationTime
+          Math.abs(e.at - animation.startTime) < 0.1 // Trova l'evento con tempo simile
         ) as MoveEv;
         
         if (moveEvent) {
-          this.checkTrainArrival(trainId, moveEvent.to);
+          // Aggiorna la posizione del treno quando l'animazione è completata
+          this.updateTrainPosition(trainId, moveEvent.to);
         }
         
         completedAnimations.push(trainId);
