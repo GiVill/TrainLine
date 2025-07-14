@@ -1,5 +1,5 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;; DOMAIN FERROVIARIO MODIFICATO – PDDL 2.1 (Con fermata e uscita)      ;;
+;; DOMAIN FERROVIARIO MODIFICATO – PDDL 2.1 (Con T3 e nuove azioni)     ;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 (define (domain railway-system)
   (:requirements :typing :negative-preconditions :durative-actions :fluents)
@@ -42,6 +42,14 @@
     :duration (= ?duration 15)  ; 15 secondi dall'inizio
     :condition (at start (not (can-depart t2)))
     :effect (at end (can-depart t2)))
+
+  ;;-----------------------------------------------------------------------
+  ;; Azione per abilitare la partenza ritardata di T3 (17 secondi)
+  (:durative-action enable-departure-t3
+    :parameters ()
+    :duration (= ?duration 17)  ; 17 secondi dall'inizio (2 secondi dopo T2)
+    :condition (at start (not (can-depart t3)))
+    :effect (at end (can-depart t3)))
 
   ;;-----------------------------------------------------------------------
   ;; Azione per la fermata obbligatoria di 5 secondi agli stop
@@ -111,6 +119,40 @@
         (at end (at ?t switch-6))
         (at end (not (train-moving ?t)))))
 
+  ;; NUOVA AZIONE: Da switch-3 a switch-9 (percorso alternativo)
+  (:durative-action move-switch3-switch9
+    :parameters (?t - train)
+    :duration (= ?duration 10)
+    :condition (and
+        (at start (at ?t switch-3))
+        (at start (track-clear track-switch3-switch9)))
+    :effect (and
+        (at start (not (track-clear track-switch3-switch9)))
+        (at start (not (at ?t switch-3)))
+        (at start (train-moving ?t))
+        (at start (not (switch-open switch-3)))  ; Chiude switch-3 durante movimento
+        (at start (not (switch-open switch-9)))  ; Chiude switch-9 durante movimento
+        (at end (track-clear track-switch3-switch9))
+        (at end (at ?t switch-9))
+        (at end (not (train-moving ?t)))))
+
+  ;; NUOVA AZIONE: Da switch-9 a switch-11 (collegamento verso stop-7)
+  (:durative-action move-switch9-switch11
+    :parameters (?t - train)
+    :duration (= ?duration 6)
+    :condition (and
+        (at start (at ?t switch-9))
+        (at start (track-clear track-switch9-switch11)))
+    :effect (and
+        (at start (not (track-clear track-switch9-switch11)))
+        (at start (not (at ?t switch-9)))
+        (at start (train-moving ?t))
+        (at start (not (switch-open switch-9)))  ; Chiude switch-9 durante movimento
+        (at start (not (switch-open switch-11))) ; Chiude switch-11 durante movimento
+        (at end (track-clear track-switch9-switch11))
+        (at end (at ?t switch-11))
+        (at end (not (train-moving ?t)))))
+
   ;; Da switch-6 a switch-21 (switch vengono aperti durante movimento)
   (:durative-action move-switch6-switch21
     :parameters (?t - train)
@@ -127,6 +169,55 @@
         (at end (track-clear track-switch6-switch21))
         (at end (at ?t switch-21))
         (at end (not (train-moving ?t)))))
+
+  ;; NUOVA AZIONE: Da switch-6 a point-8 (percorso alternativo)
+  (:durative-action move-switch6-point8
+    :parameters (?t - train)
+    :duration (= ?duration 4)
+    :condition (and
+        (at start (at ?t switch-6))
+        (at start (track-clear track-switch6-point8)))
+    :effect (and
+        (at start (not (track-clear track-switch6-point8)))
+        (at start (not (at ?t switch-6)))
+        (at start (train-moving ?t))
+        (at start (switch-open switch-6))    ; Apre switch-6 durante movimento
+        (at end (track-clear track-switch6-point8))
+        (at end (at ?t point-8))
+        (at end (not (train-moving ?t)))))
+
+  ;; NUOVA AZIONE: Da point-8 a switch-11 (collegamento verso stop-7)
+  (:durative-action move-point8-switch11
+    :parameters (?t - train)
+    :duration (= ?duration 8)
+    :condition (and
+        (at start (at ?t point-8))
+        (at start (track-clear track-point8-switch11)))
+    :effect (and
+        (at start (not (track-clear track-point8-switch11)))
+        (at start (not (at ?t point-8)))
+        (at start (train-moving ?t))
+        (at start (not (switch-open switch-11))) ; Chiude switch-11 durante movimento
+        (at end (track-clear track-point8-switch11))
+        (at end (at ?t switch-11))
+        (at end (not (train-moving ?t)))))
+
+  ;; NUOVA AZIONE: Da switch-11 a stop-7 (destinazione finale T3)
+  (:durative-action move-switch11-stop7
+    :parameters (?t - train)
+    :duration (= ?duration 14)
+    :condition (and
+        (at start (at ?t switch-11))
+        (at start (track-clear track-switch11-stop7)))
+    :effect (and
+        (at start (not (track-clear track-switch11-stop7)))
+        (at start (not (at ?t switch-11)))
+        (at start (train-moving ?t))
+        (at start (not (switch-open switch-11))) ; Chiude switch-11 durante movimento
+        (at end (track-clear track-switch11-stop7))
+        (at end (at ?t stop-7))
+        (at end (not (train-moving ?t)))
+        (at end (assign (time-arrived ?t) (total-time)))))
 
   ;; Da switch-21 a point-7 (switch-21 mantiene stato aperto)
   (:durative-action move-switch21-point7
@@ -245,6 +336,23 @@
         (at end (at ?t switch-25))
         (at end (not (train-moving ?t)))))
 
+  ;; NUOVA AZIONE: Da stop-7 a switch-11 (percorso inverso per T3)
+  (:durative-action move-stop7-switch11
+    :parameters (?t - train)
+    :duration (= ?duration 14)
+    :condition (and
+        (at start (at ?t stop-7))
+        (at start (track-clear track-switch11-stop7))
+        (at start (ready-to-exit ?t)))
+    :effect (and
+        (at start (not (track-clear track-switch11-stop7)))
+        (at start (not (at ?t stop-7)))
+        (at start (train-moving ?t))
+        (at start (not (switch-open switch-11))) ; Chiude switch-11 durante movimento
+        (at end (track-clear track-switch11-stop7))
+        (at end (at ?t switch-11))
+        (at end (not (train-moving ?t)))))
+
   ;; Da switch-28 a switch-25 (switch vengono aperti durante movimento)
   (:durative-action move-switch28-switch25
     :parameters (?t - train)
@@ -327,22 +435,79 @@
         (at end (at ?t switch-3))
         (at end (not (train-moving ?t)))))
 
-  ;; Da switch-3 a switch-8 (switch vengono chiusi durante movimento)
-  (:durative-action move-switch3-switch8
+  ;; NUOVA AZIONE: Da switch-11 a switch-9 (percorso inverso per T3)
+  (:durative-action move-switch11-switch9
     :parameters (?t - train)
-    :duration (= ?duration 9)
+    :duration (= ?duration 6)
     :condition (and
-        (at start (at ?t switch-3))
-        (at start (track-clear track-switch3-switch8))
+        (at start (at ?t switch-11))
+        (at start (track-clear track-switch9-switch11))
         (at start (has-stopped ?t))
         (at start (ready-to-exit ?t)))
     :effect (and
-        (at start (not (track-clear track-switch3-switch8)))
+        (at start (not (track-clear track-switch9-switch11)))
+        (at start (not (at ?t switch-11)))
+        (at start (train-moving ?t))
+        (at start (not (switch-open switch-9)))  ; Chiude switch-9 durante movimento
+        (at start (not (switch-open switch-11))) ; Chiude switch-11 durante movimento
+        (at end (track-clear track-switch9-switch11))
+        (at end (at ?t switch-9))
+        (at end (not (train-moving ?t)))))
+
+  ;; Da switch-3 a switch-1 (switch vengono chiusi durante movimento)
+  (:durative-action move-switch3-switch1
+    :parameters (?t - train)
+    :duration (= ?duration 8)
+    :condition (and
+        (at start (at ?t switch-3))
+        (at start (track-clear track-switch1-switch3))
+        (at start (has-stopped ?t))
+        (at start (ready-to-exit ?t)))
+    :effect (and
+        (at start (not (track-clear track-switch1-switch3)))
         (at start (not (at ?t switch-3)))
         (at start (train-moving ?t))
         (at start (not (switch-open switch-3)))  ; Chiude switch-3 durante movimento
+        (at start (not (switch-open switch-1)))  ; Chiude switch-1 durante movimento
+        (at end (track-clear track-switch1-switch3))
+        (at end (at ?t switch-1))
+        (at end (not (train-moving ?t)))))
+
+  ;; NUOVA AZIONE: Da switch-9 a switch-8 (percorso per T3 verso uscita)
+  (:durative-action move-switch9-switch8
+    :parameters (?t - train)
+    :duration (= ?duration 9)
+    :condition (and
+        (at start (at ?t switch-9))
+        (at start (track-clear track-switch9-switch8))
+        (at start (has-stopped ?t))
+        (at start (ready-to-exit ?t)))
+    :effect (and
+        (at start (not (track-clear track-switch9-switch8)))
+        (at start (not (at ?t switch-9)))
+        (at start (train-moving ?t))
+        (at start (not (switch-open switch-9)))  ; Chiude switch-9 durante movimento
         (at start (not (switch-open switch-8)))  ; Chiude switch-8 durante movimento
-        (at end (track-clear track-switch3-switch8))
+        (at end (track-clear track-switch9-switch8))
+        (at end (at ?t switch-8))
+        (at end (not (train-moving ?t)))))
+
+  ;; Da switch-1 a switch-8 (switch vengono chiusi durante movimento)
+  (:durative-action move-switch1-switch8
+    :parameters (?t - train)
+    :duration (= ?duration 12)
+    :condition (and
+        (at start (at ?t switch-1))
+        (at start (track-clear track-switch1-switch8))
+        (at start (has-stopped ?t))
+        (at start (ready-to-exit ?t)))
+    :effect (and
+        (at start (not (track-clear track-switch1-switch8)))
+        (at start (not (at ?t switch-1)))
+        (at start (train-moving ?t))
+        (at start (not (switch-open switch-1)))  ; Chiude switch-1 durante movimento
+        (at start (not (switch-open switch-8)))  ; Chiude switch-8 durante movimento
+        (at end (track-clear track-switch1-switch8))
         (at end (at ?t switch-8))
         (at end (not (train-moving ?t)))))
 

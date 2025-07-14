@@ -27,7 +27,7 @@ export class MapComponent implements OnInit, OnDestroy {
 
   // Aggiungi dopo le altre proprietà private
   private completedTrains: Set<string> = new Set();
-  private totalTrainsInSimulation = 2; // Numero totale di treni nella simulazione
+  private totalTrainsInSimulation = 3; // Numero totale di treni nella simulazione
 
   private cagliariStation: Station | null = null;
 
@@ -115,6 +115,14 @@ export class MapComponent implements OnInit, OnDestroy {
               <div class="train-indicator sassari-train"></div>
               <div class="train-info">
                 <span class="train-route">Sassari → Cagliari</span>
+                <span class="train-status">In attesa...</span>
+              </div>
+            </div>
+
+            <div class="train-status-item" id="trainStatus3">
+              <div class="train-indicator iglesias-train"></div>
+              <div class="train-info">
+                <span class="train-route">Iglesias → Cagliari</span>
                 <span class="train-status">In attesa...</span>
               </div>
             </div>
@@ -314,6 +322,14 @@ export class MapComponent implements OnInit, OnDestroy {
           .sassari-train:before {
             background: rgba(0, 123, 255, 0.3);
           }
+
+          .iglesias-train {
+            background: #777777ff;
+          }
+
+          .iglesias-train:before {
+            background: rgba(21, 22, 21, 0.3);
+          }
           
           .train-indicator.active {
             box-shadow: 0 0 15px currentColor;
@@ -394,9 +410,15 @@ export class MapComponent implements OnInit, OnDestroy {
   }
 
   private updateTrainStatus(trainId: string, status: string, isArriving: boolean = false) {
-    const statusElement = trainId === 'olbia_cagliari' ? 
-      document.getElementById('trainStatus1') : 
-      document.getElementById('trainStatus2');
+    let statusElement;
+    
+    if (trainId === 'olbia_cagliari') {
+      statusElement = document.getElementById('trainStatus1');
+    } else if (trainId === 'sassari_cagliari') {
+      statusElement = document.getElementById('trainStatus2');
+    } else if (trainId === 'iglesias_cagliari') {
+      statusElement = document.getElementById('trainStatus3');
+    }
     
     if (!statusElement) return;
 
@@ -583,14 +605,15 @@ export class MapComponent implements OnInit, OnDestroy {
     this.isSimulationRunning = true;
     this.updateSimulationButton();
 
-    // Trova le stazioni di Olbia, Sassari e Cagliari
+    // Trova le stazioni di Olbia, Sassari, Iglesias e Cagliari
     const olbiaStation = this.stations.find(s => s.stop_name.toLowerCase().includes('olbia'));
     const sassariStation = this.stations.find(s => s.stop_name.toLowerCase().includes('sassari'));
+    const iglesiasStation = this.stations.find(s => s.stop_name.toLowerCase().includes('iglesias'));
     const cagliariStation = this.stations.find(s => s.stop_name.toLowerCase().includes('cagliari'));
 
     this.cagliariStation = cagliariStation || null;
 
-    if (!olbiaStation || !sassariStation || !cagliariStation) {
+    if (!olbiaStation || !sassariStation || !iglesiasStation || !cagliariStation) {
       console.error('Non sono state trovate tutte le stazioni necessarie per la simulazione');
       this.stopSimulation();
       return;
@@ -599,8 +622,9 @@ export class MapComponent implements OnInit, OnDestroy {
     // Trova le rotte che vanno verso Cagliari
     const olbiaCagliariRoute = this.findRouteToDestination(olbiaStation, cagliariStation);
     const sassariCagliariRoute = this.findRouteToDestination(sassariStation, cagliariStation);
+    const iglesiasCarliariRoute = this.findRouteToDestination(iglesiasStation, cagliariStation);
 
-    if (!olbiaCagliariRoute || !sassariCagliariRoute) {
+    if (!olbiaCagliariRoute || !sassariCagliariRoute || !iglesiasCarliariRoute) {
       console.error('Non sono state trovate le rotte necessarie per la simulazione');
       this.stopSimulation();
       return;
@@ -623,6 +647,18 @@ export class MapComponent implements OnInit, OnDestroy {
         this.startTrainAnimationWithStatus(sassariCagliariRoute.points, 'sassari_cagliari', 'Sassari');
       }
     }, 4000);
+
+    // Aggiorna lo stato del terzo treno
+    setTimeout(() => {
+      this.updateTrainStatus('iglesias_cagliari', 'In partenza da Iglesias...');
+    }, 4500);
+
+    // Avvia il terzo treno dopo 5 secondi (Iglesias -> Cagliari)
+    setTimeout(() => {
+      if (this.isSimulationRunning) {
+        this.startTrainAnimationWithStatus(iglesiasCarliariRoute.points, 'iglesias_cagliari', 'Iglesias');
+      }
+    }, 25000);
 
     // Mostra tutte le rotte durante la simulazione
     this.showAllRoutes();
@@ -657,6 +693,7 @@ export class MapComponent implements OnInit, OnDestroy {
     if (!this.isSimulationRunning) {
       this.updateTrainStatus('olbia_cagliari', 'In attesa...');
       this.updateTrainStatus('sassari_cagliari', 'In attesa...');
+      this.updateTrainStatus('iglesias_cagliari', 'In attesa...');
     }
   }
 
@@ -717,6 +754,7 @@ export class MapComponent implements OnInit, OnDestroy {
     const colors = {
       'olbia_cagliari': '#007bff',
       'sassari_cagliari': '#28a745',
+      'iglesias_cagliari': '#ffc107',
       'default': '#dc3545'
     };
 
@@ -912,6 +950,7 @@ export class MapComponent implements OnInit, OnDestroy {
     // Reset degli stati dei treni
     this.updateTrainStatus('olbia_cagliari', 'In attesa...');
     this.updateTrainStatus('sassari_cagliari', 'In attesa...');
+    this.updateTrainStatus('iglesias_cagliari', 'In attesa...');
   }
 
   // Metodo per calcolare l'angolo di rotazione del treno

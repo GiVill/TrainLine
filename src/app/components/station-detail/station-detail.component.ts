@@ -100,6 +100,9 @@ export class StationDetailComponent {
   private trainImgs = new Map<string, SVGImageElement>();
   private activeAnimations = new Map<string, ActiveAnimation>();
 
+  private simulationSpeed = 15; // Velocità di animazione (1x, 2x, 3x, etc.)
+
+
   // ────────── commenti animazione ──────────
   animationComments: AnimationComment[] = [];
   currentComment: AnimationComment | null = null;
@@ -222,7 +225,6 @@ export class StationDetailComponent {
 
   // ───────────────────────────────────────── NORMALIZZAZIONE NOMI POSIZIONI ─────────────────────
   private normalizeLocationName(name: string): string {
-    // Converte i nomi dal nuovo formato al formato originale
     name = name.toLowerCase();
 
     if (name.startsWith('start')) {
@@ -237,9 +239,14 @@ export class StationDetailComponent {
     if (name.startsWith('point')) {
       return `point-${name.replace('point', '')}`;
     }
+    if (name.startsWith('exit')) {
+      // <-- nuovo caso per gestire exit-1, exit-2, …
+      return `exit-${name.replace('exit', '')}`;
+    }
 
     return name;
   }
+
 
   // ───────────────────────────────────────── NUOVA PROPRIETÀ DELLA CLASSE ─────────────────────
   private trainCurrentPositions = new Map<string, string>();
@@ -265,7 +272,7 @@ export class StationDetailComponent {
             destinationItem.isAnimating = false;
             destinationItem.isArrived = true;
           }
-        }, 2000); // Durata dell'animazione di arrivo
+        }, 2000 / this.simulationSpeed); // Durata dell'animazione di arrivo
       }
     }
   }
@@ -461,7 +468,7 @@ export class StationDetailComponent {
     if (!this.isAnimating) return;
 
     const now = performance.now();
-    this.currentAnimationTime = (now - this.animationStartTime) / 1000; // tempo in secondi
+    this.currentAnimationTime = (now - this.animationStartTime) / 1000 * this.simulationSpeed; // tempo in secondi
 
     // Processa tutti gli eventi che dovrebbero essere attivi in questo momento
     this.processEvents();
@@ -476,14 +483,26 @@ export class StationDetailComponent {
   // ───────────────────────────────────────── AGGIORNAMENTO POSIZIONI TRENI ─────────────────────
 
   private updateTrainPosition(trainId: string, newLocation: string) {
+    // Se è un exit, rimuovo subito il treno
+    if (newLocation.startsWith('exit-')) {
+      const img = this.trainImgs.get(trainId);
+      if (img) {
+        img.remove();                   // sparisce dal DOM
+        this.trainImgs.delete(trainId); // togliamo il riferimento
+      }
+      this.trainCurrentPositions.delete(trainId);
+      return;
+    }
+
     const oldLocation = this.trainCurrentPositions.get(trainId);
     this.trainCurrentPositions.set(trainId, newLocation);
-    
-    // Controlla se il treno è arrivato a destinazione
+
+    // Controlla se il treno è arrivato a destinazione finale (stop-…)
     this.checkTrainArrival(trainId, newLocation);
-    
+
     console.log(`Treno ${trainId}: posizione aggiornata da ${oldLocation || 'sconosciuta'} a ${newLocation}`);
   }
+
 
   private processEvents() {
     const svgDoc = this.mapObject.nativeElement.contentDocument!;
