@@ -1,8 +1,8 @@
 "stop_id","stop_code","stop_name","stop_desc","stop_lat","stop_lon","zone_id","stop_url","location_type","parent_station","stop_timezone","wheelchair_boarding","level_id","platform_code"
+"830012891",,"Stazione di CAGLIARI",,"39.216084","9.107992","6",,,,,,,
 "830012810",,"Stazione di CAGLIARI S.GILLA",,"39.22779","9.096391","6",,,,,,,
 "830012816",,"Stazione di PLOAGHE",,"40.661322","8.72808","412",,,,,,,
 "830012852",,"Stazione di GOLFO ARANCI",,"40.994716","9.627688","328",,,,,,,
-"830012891",,"Stazione di CAGLIARI",,"39.216084","9.107992","6",,,,,,,
 "830012895",,"Stazione di RUDALZA (GOLFO ARANCI)",,"40.994089","9.531225","345",,,,,,,
 "830012896",,"Stazione di SU CANALE (MONTI)",,"40.838383","9.404229","333",,,,,,,
 "830012950",,"Stazione di IGLESIAS",,"39.310571","8.539796","106",,,,,,,

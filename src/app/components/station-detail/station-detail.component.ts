@@ -3,10 +3,12 @@ import {
   Input,
   ViewChild,
   ElementRef,
+  OnInit,
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { HttpClient } from '@angular/common/http';
 import { firstValueFrom } from 'rxjs';
+import { Station } from '../../model/models';
 
 // ────────────────────────────────────────────────────
 // Tipi evento estratti dal piano
@@ -72,6 +74,17 @@ export class StationDetailComponent {
   @ViewChild('mapObject', { static: false }) mapObject!: ElementRef<HTMLObjectElement>;
 
   constructor(private http: HttpClient) {}
+
+  ngOnInit(): void {
+    window.addEventListener('openStationDetail', (e: any) => {
+      const st: Station = e.detail;
+      if (st.stop_name === this.station.stop_name) {
+        this.expanded = true;
+        this.startAnimation();
+      }
+    });
+  }
+
 
   // ────────── runtime ──────────
   private events: Event[] = [];
