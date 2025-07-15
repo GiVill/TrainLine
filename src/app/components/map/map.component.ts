@@ -750,18 +750,18 @@ export class MapComponent implements OnInit, OnDestroy {
   // Train Icon usando il file PNG
 
   private createPngTrainIcon(trainId: string = 'default') {
-    // Colori diversi per treni diversi
-    const colors = {
-      'olbia_cagliari': '#007bff',
-      'sassari_cagliari': '#28a745',
-      'iglesias_cagliari': '#ffc107',
-      'default': '#dc3545'
+    // Mappa dei file icona per ogni treno
+    const iconFiles = {
+      'olbia_cagliari': 'assets/train_icon.png',
+      'sassari_cagliari': 'assets/train_blu.png',
+      'iglesias_cagliari': 'assets/train_grigio.png',
+      'default': 'assets/train_icon.png'
     };
 
-    const color = colors[trainId as keyof typeof colors] || colors.default;
+    const iconUrl = iconFiles[trainId as keyof typeof iconFiles] || iconFiles.default;
 
     return L.icon({
-      iconUrl: 'assets/train_icon.png',
+      iconUrl: iconUrl,
       iconSize: [48, 32],
       iconAnchor: [24, 16],
       popupAnchor: [0, -16],

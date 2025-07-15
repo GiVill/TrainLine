@@ -100,7 +100,10 @@ export class StationDetailComponent {
   private trainImgs = new Map<string, SVGImageElement>();
   private activeAnimations = new Map<string, ActiveAnimation>();
 
-  private simulationSpeed = 15; // Velocità di animazione (1x, 2x, 3x, etc.)
+  private simulationSpeed = 5; // Velocità di animazione (1x, 2x, 3x, etc.)
+
+  private trainOrder: string[] = [];
+  private trainColors = ['treno_grigio.png', 'treno_rosso.png', 'treno_blu.png'];
 
 
   // ────────── commenti animazione ──────────
@@ -164,6 +167,9 @@ export class StationDetailComponent {
 
     // Reset posizioni treni
     this.trainCurrentPositions.clear();
+    
+    // Reset ordine treni - AGGIUNGI QUESTA RIGA
+    this.trainOrder = [];
 
     // rimuove eventuali trenini
     this.trainImgs.forEach(img => img.remove());
@@ -449,8 +455,20 @@ export class StationDetailComponent {
   private getTrain(svgDoc: Document, tr: string) {
     const cached = this.trainImgs.get(tr);
     if (cached) return cached;
+    
+    // Determina l'indice del treno nell'ordine di apparizione
+    let trainIndex = this.trainOrder.indexOf(tr);
+    if (trainIndex === -1) {
+      this.trainOrder.push(tr);
+      trainIndex = this.trainOrder.length - 1;
+    }
+    
+    // Seleziona il colore basato sull'indice (ciclico se ci sono più di 3 treni)
+    const colorIndex = trainIndex % this.trainColors.length;
+    const trainImage = this.trainColors[colorIndex];
+    
     const img = svgDoc.createElementNS('http://www.w3.org/2000/svg','image');
-    img.setAttributeNS('http://www.w3.org/1999/xlink','href','treno_rosso.png');
+    img.setAttributeNS('http://www.w3.org/1999/xlink','href', trainImage);
     img.setAttribute('width','27'); img.setAttribute('height','27'); img.style.pointerEvents='none';
     svgDoc.querySelector('svg')!.appendChild(img);
     this.trainImgs.set(tr,img);

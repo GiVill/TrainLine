@@ -1,9 +1,9 @@
 import { Component, signal, ViewChild } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { HeaderComponent } from './Components/header/header.component';
-import { SidebarComponent } from './Components/sidebar/sidebar.component';
-import { MapComponent } from './Components/map/map.component';
-import { StationDetailComponent } from './Components/station-detail/station-detail.component';
+import { HeaderComponent } from './components/header/header.component';
+import { SidebarComponent } from './components/sidebar/sidebar.component';
+import { MapComponent } from './components/map/map.component';
+import { StationDetailComponent } from './components/station-detail/station-detail.component';
 import { Station } from './model/models';
 
 @Component({

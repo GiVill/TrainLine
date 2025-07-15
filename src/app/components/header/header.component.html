@@ -1,10 +1,53 @@
 <header class="header">
   <div class="header-content">
     <div class="logo">
-      <span class="logo-text">SARDEGNA</span>
+      <!-- Nuovi loghi affiancati -->
+      <img src="../../../assets/Tonyeffejpeg.jpeg"   alt="Regione Sardegna" class="logo-image logo-sardegna">
+      <img src="../../../assets/sardegna.jpeg" alt="Trenitalia"       class="logo-image logo-trenitalia">
     </div>
     <div class="header-title">
-      <h1>Transportation Network</h1>
+      <!-- (eventuale titolo o altro contenuto) -->
     </div>
   </div>
 </header>
+
+<style>
+/* Layout globale già esistente */
+.header {
+  display: flex;
+  justify-content: flex-start;
+  align-items: center;
+  padding: 10px 0;
+}
+
+.header-content {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  width: 100%;
+  padding-left: 0;
+  margin-left: 0;
+}
+
+/* --- Nuovo: gestisce i due loghi uno vicino all'altro --- */
+.logo {
+  display: flex;          /* mette le immagini in orizzontale */
+  align-items: center;
+  gap: 0px;               /* nessuno spazio fra i loghi - attaccati */
+  margin-left: 13px;
+  padding-left: 0;
+}
+
+.logo-image {
+  height: 33px;
+  width: auto;
+  object-fit: contain;
+}
+
+/* Responsive: abbasso leggermente l'altezza sotto i 768 px */
+@media (max-width: 768px) {
+  .logo-image {
+    height: 30px;
+  }
+}
+</style>

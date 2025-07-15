@@ -48,7 +48,7 @@
   <div class="station-detail-expanded" [class.visible]="isExpanded()">
     <div class="station-content">
       <div class="diagram-section" style="grid-column: 1 / -1;">
-        <h3>Station Map</h3>
+        <h3>Cartina della stazione</h3>
 
         <!-- Controlli animazione - solo per la stazione di Cagliari -->
         <div class="animation-controls" *ngIf="station.stop_name === 'Stazione di CAGLIARI'">
@@ -105,7 +105,7 @@
             <object
               #mapObject
               type="image/svg+xml"
-              data="assets/Ridotta.svg"
+              data="assets/cagliari.svg"
               class="map-svg"
               aria-label="Mappa della stazione di Cagliari"
               (load)="onSvgLoad()"

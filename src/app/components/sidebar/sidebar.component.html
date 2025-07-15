@@ -6,10 +6,10 @@
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
           <polyline points="15,18 9,12 15,6"></polyline>
         </svg>
-        Back to Stations
+        Indietro
       </button>
     } @else {
-      <h2>Network Overview</h2>
+      <h2>Rete Ferroviaria Sardegna</h2>
     }
   </div>
 
@@ -17,7 +17,7 @@
     <!-- ───── Search Bar ───── -->
     <div class="search-container">
       <input type="text" class="search-input"
-             placeholder="Search stations, routes…"
+             placeholder="Cerca stazione o tratta..."
              [value]="searchTerm()"
              (input)="onSearchChange($any($event.target).value)" />
       <svg class="search-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">

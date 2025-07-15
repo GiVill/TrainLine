@@ -1,11 +1,12 @@
 // src/app/app.routes.ts
 import { Routes } from '@angular/router';
-import { OverviewComponent } from './Components/overview/overview.component';
-import { StationdetailComponent } from './Components/stationdetail/stationdetail.component';
+
+import { AppComponent } from './app.component';
+import { StationDetailComponent } from './components/station-detail/station-detail.component';
 
 
 export const routes: Routes = [
-  { path: '', component: OverviewComponent },
-  { path: 'station/:id', component: StationdetailComponent },
+  { path: '', component: AppComponent },
+  { path: 'station/:id', component: StationDetailComponent },
   { path: '**', redirectTo: '' }
 ];
