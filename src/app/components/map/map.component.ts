@@ -750,25 +750,20 @@ export class MapComponent implements OnInit, OnDestroy {
   // Train Icon usando il file PNG
 
   private createPngTrainIcon(trainId: string = 'default') {
-    // Mappa dei file icona per ogni treno
     const iconFiles = {
-      'olbia_cagliari': 'assets/train_icon.png',
-      'sassari_cagliari': 'assets/train_blu.png',
-      'iglesias_cagliari': 'assets/train_grigio.png',
+      'olbia_cagliari': 'assets/treno_rosso2.png',
+      'sassari_cagliari': 'assets/treno_blu2.png',
+      'iglesias_cagliari': 'assets/treno_grigio2.png',
       'default': 'assets/train_icon.png'
     };
 
     const iconUrl = iconFiles[trainId as keyof typeof iconFiles] || iconFiles.default;
 
-    return L.icon({
-      iconUrl: iconUrl,
-      iconSize: [48, 32],
-      iconAnchor: [24, 16],
-      popupAnchor: [0, -16],
-      shadowUrl: undefined,
-      shadowSize: undefined,
-      shadowAnchor: undefined,
-      className: `train-png-icon train-${trainId}`
+    return L.divIcon({
+      html: `<img src="${iconUrl}" class="train-rotatable-icon" style="width: 72px; height: 48px; transform-origin: center;">`,
+      iconSize: [72, 48],
+      iconAnchor: [36, 24],
+      className: `train-icon-container train-${trainId}`
     });
   }
 
@@ -801,10 +796,9 @@ export class MapComponent implements OnInit, OnDestroy {
         // calcola e applica rotazione
         const angle = this.calculateBearing([from.lat, from.lng], [to.lat, to.lng]);
         if (iconElement) {
-          const trainDiv = iconElement.querySelector('.enhanced-png-train') || iconElement.querySelector('img');
+          const trainDiv = iconElement.querySelector('.train-rotatable-icon');
           if (trainDiv) {
             trainDiv.style.transform = `rotate(${angle}deg)`;
-            trainDiv.style.transition = '';
           }
         }
 
@@ -876,7 +870,7 @@ export class MapComponent implements OnInit, OnDestroy {
         // calcola e applica rotazione
         const angle = this.calculateBearing([from.lat, from.lng], [to.lat, to.lng]);
         if (iconElement) {
-          const trainDiv = iconElement.querySelector('.enhanced-png-train') || iconElement.querySelector('img');
+          const trainDiv = iconElement.querySelector('.train-rotatable-icon');
           if (trainDiv) {
             trainDiv.style.transform = `rotate(${angle}deg)`;
             trainDiv.style.transition = '';
@@ -968,7 +962,8 @@ export class MapComponent implements OnInit, OnDestroy {
     let bearing = Math.atan2(y, x) * 180 / Math.PI;
     bearing = (bearing + 360) % 360;
 
-    return bearing - 90;
+    // Aggiusta l'angolo in base all'orientamento del tuo PNG del treno
+    return bearing; // Prova anche bearing - 90 se il treno risulta ruotato di 90 gradi
   }
 
   /**

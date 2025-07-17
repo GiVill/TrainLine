@@ -369,3 +369,13 @@
   transition: transform 0.5s ease !important;
   transform-origin: center center !important;
 }
+
+.train-rotatable-icon {
+  transition: transform 0.2s ease-in-out;
+  transform-origin: center;
+}
+
+.train-icon-container {
+  background: transparent !important;
+  border: none !important;
+}
