@@ -74,7 +74,6 @@
       (at start (track-occupied ?track))
       (at start (train-moving ?train))
       (over all (track-occupied ?track))
-      ; VINCOLO AGGIUNTO: non può andare verso exit-1 senza permesso
       (at start (not (and (= ?to exit-1) (not (train-can-exit ?train)))))
     )
     :effect (and
@@ -96,7 +95,7 @@
       (at start (track-reserved ?track ?train))
       (at start (track-occupied ?track))
       (at start (train-moving ?train))
-      (at start (train-can-exit ?train))  ; DEVE aver il permesso di uscire
+      (at start (train-can-exit ?train))
       (over all (track-occupied ?track))
     )
     :effect (and
