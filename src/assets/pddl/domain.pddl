@@ -1,5 +1,5 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;; DOMAIN FERROVIARIO MODIFICATO – PDDL 2.1 (Con T3 e nuove azioni)     ;;
+;; DOMAIN FERROVIARIO MODIFICATO – PDDL 2.1
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 (define (domain railway-system)
   (:requirements :typing :negative-preconditions :durative-actions :fluents)
@@ -119,7 +119,7 @@
         (at end (at ?t switch-6))
         (at end (not (train-moving ?t)))))
 
-  ;; NUOVA AZIONE: Da switch-3 a switch-9 (percorso alternativo)
+  ;; Da switch-3 a switch-9 (percorso alternativo)
   (:durative-action move-switch3-switch9
     :parameters (?t - train)
     :duration (= ?duration 10)
@@ -136,7 +136,7 @@
         (at end (at ?t switch-9))
         (at end (not (train-moving ?t)))))
 
-  ;; NUOVA AZIONE: Da switch-9 a switch-11 (collegamento verso stop-7)
+  ;; Da switch-9 a switch-11 (collegamento verso stop-7)
   (:durative-action move-switch9-switch11
     :parameters (?t - train)
     :duration (= ?duration 6)
@@ -170,7 +170,7 @@
         (at end (at ?t switch-21))
         (at end (not (train-moving ?t)))))
 
-  ;; NUOVA AZIONE: Da switch-6 a point-8 (percorso alternativo)
+  ;; Da switch-6 a point-8 (percorso alternativo)
   (:durative-action move-switch6-point8
     :parameters (?t - train)
     :duration (= ?duration 4)
@@ -186,7 +186,7 @@
         (at end (at ?t point-8))
         (at end (not (train-moving ?t)))))
 
-  ;; NUOVA AZIONE: Da point-8 a switch-11 (collegamento verso stop-7)
+  ;; Da point-8 a switch-11 (collegamento verso stop-7)
   (:durative-action move-point8-switch11
     :parameters (?t - train)
     :duration (= ?duration 8)
@@ -202,7 +202,7 @@
         (at end (at ?t switch-11))
         (at end (not (train-moving ?t)))))
 
-  ;; NUOVA AZIONE: Da switch-11 a stop-7 (destinazione finale T3)
+  ;; Da switch-11 a stop-7 (destinazione finale T3)
   (:durative-action move-switch11-stop7
     :parameters (?t - train)
     :duration (= ?duration 14)
@@ -336,7 +336,7 @@
         (at end (at ?t switch-25))
         (at end (not (train-moving ?t)))))
 
-  ;; NUOVA AZIONE: Da stop-7 a switch-11 (percorso inverso per T3)
+  ;; Da stop-7 a switch-11 (percorso inverso per T3)
   (:durative-action move-stop7-switch11
     :parameters (?t - train)
     :duration (= ?duration 14)
@@ -435,7 +435,7 @@
         (at end (at ?t switch-3))
         (at end (not (train-moving ?t)))))
 
-  ;; NUOVA AZIONE: Da switch-11 a switch-9 (percorso inverso per T3)
+  ;; Da switch-11 a switch-9 (percorso inverso per T3)
   (:durative-action move-switch11-switch9
     :parameters (?t - train)
     :duration (= ?duration 6)
@@ -473,7 +473,7 @@
         (at end (at ?t switch-1))
         (at end (not (train-moving ?t)))))
 
-  ;; NUOVA AZIONE: Da switch-9 a switch-8 (percorso per T3 verso uscita)
+  ;; Da switch-9 a switch-8 (percorso per T3 verso uscita)
   (:durative-action move-switch9-switch8
     :parameters (?t - train)
     :duration (= ?duration 9)
@@ -528,8 +528,4 @@
         (at end (track-clear track-switch8-exit1))
         (at end (at ?t exit-1))
         (at end (not (train-moving ?t)))))
-
-  ;;-----------------------------------------------------------------------
-  ;; Le azioni per operare manualmente gli switch sono state rimosse
-  ;; perché ora gli switch cambiano automaticamente durante il movimento
 )

@@ -1,5 +1,5 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;; PROBLEM FERROVIARIO MODIFICATO – PDDL 2.1 (Con T3 e nuovi percorsi)  ;;
+;; PROBLEM FERROVIARIO MODIFICATO – PDDL 2.1
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 (define (problem railway-scheduling)
   (:domain railway-system)
@@ -25,12 +25,12 @@
       (at t1 start-1)
       (at t2 start-1)
       (at t3 start-1)
-      
+
       ;; Tutti i treni devono aspettare i loro tempi di partenza
       (not (can-depart t1))
       (not (can-depart t2))
       (not (can-depart t3))
-      
+
       ;; Nessun treno ha ancora effettuato la fermata
       (not (has-stopped t1))
       (not (has-stopped t2))
