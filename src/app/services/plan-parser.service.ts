@@ -3,8 +3,61 @@ import { HttpClient } from '@angular/common/http';
 import { firstValueFrom } from 'rxjs';
 
 // ────────────────────────────────────────────────────
-// Tipi evento estratti dal piano
+// Tipi evento estratti dal piano - VERSIONE AGGIORNATA
 // ────────────────────────────────────────────────────
+
+export interface StartTrainEv {
+  kind: 'start-train';
+  at: number;
+  train: string;
+  startLocation: string;
+  path: string[]; // percorso completo
+  duration: number;
+  cost: number;
+}
+
+export interface MoveTrainEv {
+  kind: 'move-train';
+  at: number;
+  train: string;
+  from: string;
+  to: string;
+  via?: string; // track utilizzato
+  duration: number;
+  cost: number;
+}
+
+export interface MoveThroughSwitchEv {
+  kind: 'move-through-switch';
+  at: number;
+  train: string;
+  startLocation: string;
+  path: string[]; // percorso completo attraverso gli switch
+  duration: number;
+  cost: number;
+}
+
+export interface SwitchTrackEv {
+  kind: 'switch-track';
+  at: number;
+  switch: string;
+  fromTrack: string;
+  toTrack: string;
+  tracks: string[]; // tutti i track coinvolti
+  duration: number;
+  cost: number;
+}
+
+export interface ReserveTrackEv {
+  kind: 'reserve-track';
+  at: number;
+  train: string;
+  track: string;
+  duration: number;
+  cost: number;
+}
+
+// Manteniamo i tipi originali per retrocompatibilità
 export interface ReleaseEv {
   kind: 'release';
   at: number;
@@ -36,16 +89,16 @@ export interface SwitchEv {
   status: 'open' | 'closed';
 }
 
-export type Event = ReleaseEv | MoveEv | TrackEv | SwitchEv;
+export type Event = StartTrainEv | MoveTrainEv | MoveThroughSwitchEv | SwitchTrackEv | ReserveTrackEv | ReleaseEv | MoveEv | TrackEv | SwitchEv;
 
 // ────────────────────────────────────────────────────
-// Interfaccia per i commenti dell'animazione
+// Interfaccia per i commenti dell'animazione - AGGIORNATA
 // ────────────────────────────────────────────────────
 export interface AnimationComment {
   stepNumber: number;
   time: number;
   description: string;
-  eventType: 'release' | 'move' | 'track' | 'switch';
+  eventType: Event['kind'];
 }
 
 // ────────────────────────────────────────────────────
@@ -97,12 +150,95 @@ export class PlanParserService {
   }
 
   /**
-   * Parsifica gli eventi dal testo del piano
+   * Parsifica gli eventi dal testo del piano - VERSIONE AGGIORNATA
    */
   private parseEvents(txt: string): Event[] {
     const evs: Event[] = [];
 
-    // Parsing per eventi MOVE nel nuovo formato: MOVE-FROM-TO TRAIN [D:duration; C:cost]
+    // 1. START-TRAIN: (START-TRAIN TRAIN-3 START-1 SWITCH-1 TRACK-35) [D:0.10; C:0.10]
+    const startTrainRegex = /([\d.]+):\s*\(START-TRAIN\s+([^\s]+)\s+([^)]+)\)\s*\[D:([\d.]+);\s*C:([\d.]+)\]/gi;
+    for (const match of txt.matchAll(startTrainRegex)) {
+      const pathElements = match[3].trim().split(/\s+/);
+      const startLocation = pathElements[0];
+
+      evs.push({
+        kind: 'start-train',
+        at: parseFloat(match[1]),
+        train: match[2],
+        startLocation: this.normalizeLocationName(startLocation),
+        path: pathElements.map(el => this.normalizeLocationName(el)),
+        duration: parseFloat(match[4]),
+        cost: parseFloat(match[5])
+      });
+    }
+
+    // 2. MOVE-TRAIN: (MOVE-TRAIN TRAIN-1 SWITCH-8 EXIT-1 TRACK-36) [D:3.00; C:0.10]
+    const moveTrainRegex = /([\d.]+):\s*\(MOVE-TRAIN\s+([^\s]+)\s+([^\s]+)\s+([^\s]+)(?:\s+([^\s)]+))?\)\s*\[D:([\d.]+);\s*C:([\d.]+)\]/gi;
+    for (const match of txt.matchAll(moveTrainRegex)) {
+      evs.push({
+        kind: 'move-train',
+        at: parseFloat(match[1]),
+        train: match[2],
+        from: this.normalizeLocationName(match[3]),
+        to: this.normalizeLocationName(match[4]),
+        via: match[5] ? this.normalizeLocationName(match[5]) : undefined,
+        duration: parseFloat(match[6]),
+        cost: parseFloat(match[7])
+      });
+    }
+
+    // 3. MOVE-THROUGH-SWITCH: (MOVE-THROUGH-SWITCH TRAIN-2 START-1 SWITCH-1 SWITCH-2 TRACK-35 SWITCH-1 TRACK-32)
+    const moveThroughSwitchRegex = /([\d.]+):\s*\(MOVE-THROUGH-SWITCH\s+([^\s]+)\s+([^)]+)\)(?:\s*\[D:([\d.]+);\s*C:([\d.]+)\])?/gi;
+    // Nel metodo parseEvents, sostituisci la sezione MOVE-THROUGH-SWITCH con:
+    for (const match of txt.matchAll(moveThroughSwitchRegex)) {
+      const pathElements = match[3].trim().split(/\s+/);
+      const startLocation = pathElements[0];
+
+      evs.push({
+        kind: 'move-through-switch',
+        at: parseFloat(match[1]),
+        train: match[2],
+        startLocation: this.normalizeLocationName(startLocation),
+        path: pathElements.map(el => this.normalizeLocationName(el)),
+        duration: match[4] ? parseFloat(match[4]) : 2.0, // default duration se non specificata
+        cost: match[5] ? parseFloat(match[5]) : 0.1 // default cost se non specificato
+      });
+    }
+
+
+    // 4. SWITCH-TRACK: (SWITCH-TRACK SWITCH-12 TRACK-21 TRACK-22 TRACK-21 TRACK-7) [D:1.50; C:0.10]
+    const switchTrackRegex = /([\d.]+):\s*\(SWITCH-TRACK\s+([^\s]+)\s+([^\s]+)\s+([^\s]+)\s+([^)]+)\)\s*\[D:([\d.]+);\s*C:([\d.]+)\]/gi;
+    for (const match of txt.matchAll(switchTrackRegex)) {
+      const tracks = match[5].trim().split(/\s+/);
+
+      evs.push({
+        kind: 'switch-track',
+        at: parseFloat(match[1]),
+        switch: this.normalizeLocationName(match[2]),
+        fromTrack: this.normalizeLocationName(match[3]),
+        toTrack: this.normalizeLocationName(match[4]),
+        tracks: [match[3], match[4], ...tracks].map(t => this.normalizeLocationName(t)),
+        duration: parseFloat(match[6]),
+        cost: parseFloat(match[7])
+      });
+    }
+
+    // 5. RESERVE-TRACK: (RESERVE-TRACK TRAIN-3 TRACK-22) [D:0.05; C:0.10]
+    const reserveTrackRegex = /([\d.]+):\s*\(RESERVE-TRACK\s+([^\s]+)\s+([^\s)]+)\)\s*\[D:([\d.]+);\s*C:([\d.]+)\]/gi;
+    for (const match of txt.matchAll(reserveTrackRegex)) {
+      evs.push({
+        kind: 'reserve-track',
+        at: parseFloat(match[1]),
+        train: match[2],
+        track: this.normalizeLocationName(match[3]),
+        duration: parseFloat(match[4]),
+        cost: parseFloat(match[5])
+      });
+    }
+
+    // ──── PARSING ORIGINALE PER RETROCOMPATIBILITÀ ────
+
+    // Parsing per eventi MOVE nel formato originale: MOVE-FROM-TO TRAIN [D:duration; C:cost]
     const move = /([\d.]+):\s*\(MOVE-([^-]+)-([^\s]+)\s+([^)]+)\)\s*\[D:([\d.]+);[^\]]*\]/gi;
     for (const m of txt.matchAll(move)) {
       const from = this.normalizeLocationName(m[2]);
@@ -158,35 +294,46 @@ export class PlanParserService {
   }
 
   /**
-   * Estrae le destinazioni dei treni dal piano
+   * Estrae le destinazioni dei treni dal piano - AGGIORNATA
    */
   private extractTrainDestinations(planText: string): void {
-    const destinations = new Map<string, string>();
+    const trainLastDestination = new Map<string, string>();
 
-    // Estrae tutti gli eventi di movimento dal piano
-    const moveEvents: { time: number, train: string, from: string, to: string }[] = [];
+    // Estrae destinazioni da START-TRAIN
+    const startTrainRegex = /([\d.]+):\s*\(START-TRAIN\s+([^\s]+)\s+([^)]+)\)/gi;
+    for (const match of planText.matchAll(startTrainRegex)) {
+      const pathElements = match[3].trim().split(/\s+/);
+      const lastDestination = pathElements[pathElements.length - 1];
+      trainLastDestination.set(match[2], this.normalizeLocationName(lastDestination));
+    }
 
-    // Nuovo regex per il formato aggiornato: MOVE-FROM-TO TRAIN
+    // Estrae destinazioni da MOVE-TRAIN
+    const moveTrainRegex = /([\d.]+):\s*\(MOVE-TRAIN\s+([^\s]+)\s+([^\s]+)\s+([^\s)]+)/gi;
+    for (const match of planText.matchAll(moveTrainRegex)) {
+      trainLastDestination.set(match[2], this.normalizeLocationName(match[4]));
+    }
+
+    // Estrae destinazioni da MOVE-THROUGH-SWITCH
+    const moveThroughSwitchRegex = /([\d.]+):\s*\(MOVE-THROUGH-SWITCH\s+([^\s]+)\s+([^)]+)\)\s*(?:\[D:([\d.]+);\s*C:([\d.]+)\])?/gi;
+    for (const match of planText.matchAll(moveThroughSwitchRegex)) {
+      const pathElements = match[3].trim().split(/\s+/);
+      const lastDestination = pathElements[pathElements.length - 1];
+      trainLastDestination.set(match[2], this.normalizeLocationName(lastDestination));
+    }
+
+    // Mantieni compatibilità con il formato originale
+    const moveEvents: { time: number, train: string, to: string }[] = [];
     const moveRegex = /([\d.]+):\s*\(MOVE-([^-]+)-([^\s]+)\s+([^)]+)\)/gi;
-
     for (const match of planText.matchAll(moveRegex)) {
-      const from = this.normalizeLocationName(match[2]);
       const to = this.normalizeLocationName(match[3]);
-
       moveEvents.push({
         time: parseFloat(match[1]),
         train: match[4],
-        from: from,
         to: to
       });
     }
 
-    // Ordina gli eventi per tempo
     moveEvents.sort((a, b) => a.time - b.time);
-
-    // Per ogni treno, trova l'ultima destinazione
-    const trainLastDestination = new Map<string, string>();
-
     moveEvents.forEach(event => {
       trainLastDestination.set(event.train, event.to);
     });
@@ -194,9 +341,9 @@ export class PlanParserService {
     // Salva le destinazioni finali per uso interno
     this.trainFinalDestinations = new Map(trainLastDestination);
 
-    // Converte la mappa in array di oggetti, filtrando solo le destinazioni che sono "stop-"
+    // Converte la mappa in array di oggetti, filtrando solo le destinazioni finali interessanti
     this.cachedDestinations = Array.from(trainLastDestination.entries())
-      .filter(([trainId, destination]) => destination.startsWith('stop-'))
+      .filter(([trainId, destination]) => destination.startsWith('stop-') || destination.startsWith('exit-'))
       .map(([trainId, destination]) => ({
         trainId,
         destination: this.formatLocationName(destination),
@@ -205,10 +352,11 @@ export class PlanParserService {
       }));
 
     console.log('Destinazioni treni estratte:', this.cachedDestinations);
+    console.log('Mappa destinazioni finali:', this.trainFinalDestinations);
   }
 
   /**
-   * Genera i commenti per l'animazione
+   * Genera i commenti per l'animazione - AGGIORNATA
    */
   private generateComments(events: Event[]): AnimationComment[] {
     return events.map((event, index) => ({
@@ -220,26 +368,53 @@ export class PlanParserService {
   }
 
   /**
-   * Genera il testo del commento per un evento
+   * Genera il testo del commento per un evento - AGGIORNATA
    */
   private generateCommentText(event: Event): string {
     switch (event.kind) {
+      case 'start-train':
+        const pathText = event.path.map(p => this.formatLocationName(p)).join(' → ');
+        return `🚂 Il treno ${event.train} inizia il percorso da ${this.formatLocationName(event.startLocation)}: ${pathText} (durata: ${event.duration}s)`;
+
+      case 'move-train':
+        const fromFormatted = this.formatLocationName(event.from);
+        const toFormatted = this.formatLocationName(event.to);
+        const finalDestination = this.trainFinalDestinations.get(event.train);
+        const isArrivingAtFinalDestination = finalDestination === event.to && (event.to.startsWith('stop-') || event.to.startsWith('exit-'));
+
+        if (isArrivingAtFinalDestination) {
+          return `🎯 Il treno ${event.train} arriva alla destinazione finale: ${toFormatted} (durata: ${event.duration}s)`;
+        }
+
+        const viaText = event.via ? ` via ${this.formatLocationName(event.via)}` : '';
+        return `🚊 Il treno ${event.train} si sposta da ${fromFormatted} a ${toFormatted}${viaText} (durata: ${event.duration}s)`;
+
+      case 'move-through-switch':
+        const switchPath = event.path.map(p => this.formatLocationName(p)).join(' → ');
+        return `🔀 Il treno ${event.train} attraversa gli scambi: ${switchPath} (durata: ${event.duration}s)`;
+
+      case 'switch-track':
+        const tracksText = event.tracks.map(t => this.formatLocationName(t)).join(', ');
+        return `⚙️ Lo scambio ${this.formatLocationName(event.switch)} commuta da ${this.formatLocationName(event.fromTrack)} a ${this.formatLocationName(event.toTrack)} (binari: ${tracksText}, durata: ${event.duration}s)`;
+
+      case 'reserve-track':
+        return `🔒 Il treno ${event.train} riserva il binario ${this.formatLocationName(event.track)} (durata: ${event.duration}s)`;
+
+      // Mantieni i commenti originali per retrocompatibilità
       case 'release':
         return `Il treno ${event.tr} viene rilasciato dalla posizione ${this.formatLocationName(event.loc)}`;
 
       case 'move':
-        const fromFormatted = this.formatLocationName(event.from);
-        const toFormatted = this.formatLocationName(event.to);
+        const moveFromFormatted = this.formatLocationName(event.from);
+        const moveToFormatted = this.formatLocationName(event.to);
+        const moveFinalDestination = this.trainFinalDestinations.get(event.tr);
+        const moveIsArrivingAtFinalDestination = moveFinalDestination === event.to && event.to.startsWith('stop-');
 
-        // Controlla se il treno sta arrivando alla destinazione finale
-        const finalDestination = this.trainFinalDestinations.get(event.tr);
-        const isArrivingAtFinalDestination = finalDestination === event.to && event.to.startsWith('stop-');
-
-        if (isArrivingAtFinalDestination) {
-          return `🎯 Il treno ${event.tr} arriva alla destinazione finale: ${toFormatted} (durata: ${event.duration}s)`;
+        if (moveIsArrivingAtFinalDestination) {
+          return `🎯 Il treno ${event.tr} arriva alla destinazione finale: ${moveToFormatted} (durata: ${event.duration}s)`;
         }
 
-        return `Il treno ${event.tr} si sposta da ${fromFormatted} a ${toFormatted} (durata: ${event.duration}s)`;
+        return `Il treno ${event.tr} si sposta da ${moveFromFormatted} a ${moveToFormatted} (durata: ${event.duration}s)`;
 
       case 'track':
         const action = event.status === 'open' ? 'apre' : 'chiude';
@@ -255,36 +430,49 @@ export class PlanParserService {
   }
 
   /**
-   * Normalizza i nomi delle posizioni
+   * Normalizza i nomi delle posizioni - AGGIORNATA
    */
   private normalizeLocationName(name: string): string {
-    name = name.toLowerCase();
+    if (!name) return name;
+
+    name = name.toLowerCase().trim();
 
     if (name.startsWith('start')) {
-      return `start-${name.replace('start', '')}`;
+      const num = name.replace('start', '').replace('-', '');
+      return `start-${num}`;
     }
     if (name.startsWith('stop')) {
-      return `stop-${name.replace('stop', '')}`;
+      const num = name.replace('stop', '').replace('-', '');
+      return `stop-${num}`;
     }
     if (name.startsWith('switch')) {
-      return `switch-${name.replace('switch', '')}`;
+      const num = name.replace('switch', '').replace('-', '');
+      return `switch-${num}`;
+    }
+    if (name.startsWith('track')) {
+      const num = name.replace('track', '').replace('-', '');
+      return `track-${num}`;
     }
     if (name.startsWith('point')) {
-      return `point-${name.replace('point', '')}`;
+      const num = name.replace('point', '').replace('-', '');
+      return `point-${num}`;
     }
     if (name.startsWith('exit')) {
-      return `exit-${name.replace('exit', '')}`;
+      const num = name.replace('exit', '').replace('-', '');
+      return `exit-${num}`;
     }
 
     return name;
   }
 
   /**
-   * Formatta i nomi delle posizioni per renderli più leggibili
+   * Formatta i nomi delle posizioni per renderli più leggibili - AGGIORNATA
    */
   private formatLocationName(location: string): string {
+    if (!location) return location;
+
     if (location.startsWith('start-')) {
-      return `posizione di partenza ${location.replace('start-', '')}`;
+      return `Partenza ${location.replace('start-', '')}`;
     }
     if (location.startsWith('stop-')) {
       return `Fermata ${location.replace('stop-', '')}`;
@@ -292,8 +480,14 @@ export class PlanParserService {
     if (location.startsWith('switch-')) {
       return `Scambio ${location.replace('switch-', '')}`;
     }
+    if (location.startsWith('track-')) {
+      return `Binario ${location.replace('track-', '')}`;
+    }
     if (location.startsWith('point-')) {
       return `Punto ${location.replace('point-', '')}`;
+    }
+    if (location.startsWith('exit-')) {
+      return `Uscita ${location.replace('exit-', '')}`;
     }
     return location;
   }
