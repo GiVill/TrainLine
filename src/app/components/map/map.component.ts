@@ -754,7 +754,7 @@ export class MapComponent implements OnInit, OnDestroy {
       'olbia_cagliari': 'assets/treno_rosso2.png',
       'sassari_cagliari': 'assets/treno_blu2.png',
       'iglesias_cagliari': 'assets/treno_grigio2.png',
-      'default': 'assets/train_icon.png'
+      'default': 'assets/treno_rosso2.png'
     };
 
     const iconUrl = iconFiles[trainId as keyof typeof iconFiles] || iconFiles.default;
